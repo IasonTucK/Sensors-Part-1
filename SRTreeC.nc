@@ -22,6 +22,11 @@ module SRTreeC
 	uses interface Packet as RoutingPacket;
 	uses interface AMSend as RoutingAMSend;
 	uses interface AMPacket as RoutingAMPacket;
+
+	// Νέα interfaces για τα δεδομένα συνάθροισης
+	uses interface Packet as AggPacket;
+	uses interface AMSend as AggAMSend;
+	uses interface AMPacket as AggAMPacket;
 	
 	uses interface AMSend as NotifyAMSend;
 	uses interface AMPacket as NotifyAMPacket;
@@ -47,6 +52,12 @@ module SRTreeC
 	
 	uses interface PacketQueue as NotifySendQueue;
 	uses interface PacketQueue as NotifyReceiveQueue;
+
+	// Νέες ουρές για τα δεδομένα συνάθροισης
+	uses interface PacketQueue as AggSendQueue;
+	uses interface PacketQueue as AggReceiveQueue;
+
+	uses interface Random; // Για παραγωγή τυχαίων αριθμών
 }
 implementation
 {

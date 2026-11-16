@@ -10,13 +10,19 @@ implementation{
 	components new AMSenderC(AM_NOTIFYPARENTMSG) as NotifySenderC;
 	components new AMReceiverC(AM_NOTIFYPARENTMSG) as NotifyReceiverC;
 
+	components new AMSenderC(AM_AGGREGAREMSG) as AggSenderC;
+	components new AMReceiverC(AM_AGGREGAREMSG) as AggReceiverC;
+
 	// Εδώ έχουμε τις ουρές για κάθε είδος μηνλυματος, μια ουρά για αποστολή και μια για παραλαβή
 	components new PacketQueueC(SENDER_QUEUE_SIZE) as RoutingSendQueueC;
 	components new PacketQueueC(RECEIVER_QUEUE_SIZE) as RoutingReceiveQueueC;
 	components new PacketQueueC(SENDER_QUEUE_SIZE) as NotifySendQueueC;
 	components new PacketQueueC(RECEIVER_QUEUE_SIZE) as NotifyReceiveQueueC;
+
+	components new PacketQueueC(SENDER_QUEUE_SIZE) as AggSendQueueC;
+	components new PacketQueueC(RECEIVER_QUEUE_SIZE) as AggReceiveQueueC;
 	
-	components MainC, ActiveMessageC, SerialActiveMessageC, LedsC;
+	components MainC, ActiveMessageC, SerialActiveMessageC, RandomC;
 
 	// Εδώ έχουμε κάποιους μετρητές
 	components new TimerMilliC() as Led0TimerC;
@@ -40,8 +46,15 @@ implementation{
 	
 	SRTreeC.RoutingPacket->RoutingSenderC.Packet;
 	SRTreeC.RoutingAMPacket->RoutingSenderC.AMPacket;
+
+	SRTreeC.AggPacket->AggSenderC.Packet;
+	SRTreeC.AggAMPacket->AggSenderC.AMPacket;	
+
 	SRTreeC.RoutingAMSend->RoutingSenderC.AMSend;
 	SRTreeC.RoutingReceive->RoutingReceiverC.Receive;
+
+	SRTreeC.AggAMSend->AggSenderC.AMSend;
+	SRTreeC.AggReceive->AggReceiveC.Receive;
 	
 	SRTreeC.NotifyPacket->NotifySenderC.Packet;
 	SRTreeC.NotifyAMPacket->NotifySenderC.AMPacket;
@@ -59,5 +72,10 @@ implementation{
 	SRTreeC.RoutingReceiveQueue->RoutingReceiveQueueC;
 	SRTreeC.NotifySendQueue->NotifySendQueueC;
 	SRTreeC.NotifyReceiveQueue->NotifyReceiveQueueC;
+
+	SRTreeC.AggSendQueue->AggSendQueueC;
+	SRTreeC.AggReceiveQueue->AggReceiveQueueC;
+
+	SRTreeC.Random->RandomC;
 	
 }

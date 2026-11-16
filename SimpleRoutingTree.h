@@ -10,26 +10,21 @@ enum{
 	/*
 	Η ουρά των μηνυμάτων ενός κόμβου είναι:
 	1) Το πολύ 5 προς αποστολή (αν και πρακτικά θα έχω μόνο 1)
-	2) Το πού 3 προς παραλαβή (εδώ αν έχει πολλά παιδιά μπορεί να γεμίσει, για αυτό πρέπει να επεξεργαζόμαστε γρήγπρα τα δεδομένα και να μην στέλνουν όλα τα παιδιά την ίδια χρονική στιγμη)
+	2) Το πολύ 16 προς παραλαβή
 	*/
 	SENDER_QUEUE_SIZE=5,
-	RECEIVER_QUEUE_SIZE=3, // TODO:Αν έχουμε πολλούς γείτονες, να το μεγαλώσουμε λίγο
+	RECEIVER_QUEUE_SIZE=16,
 
-	AM_SIMPLEROUTINGTREEMSG=21,
 	AM_ROUTINGMSG=22,
-	AM_NOTIFYPARENTMSG=12,
+
+	AM_AGGREGAREMSG = 23, // Νέο 'active message ID'
 
 	/* Μεταβλητές για κάποιους μετρητές. Οι μετρητές είναι σε milliseconds.
 	   ΠΡΟΣΟΧΗ: 1sec = 1024 μονάδες
 	*/
-	SEND_CHECK_MILLIS=70*1024, // 70 seconds
-	TIMER_PERIOD_MILLI=150*1024, // 15 seconds
 	TIMER_FAST_PERIOD=0.2*1024, // 1/5 second
 	TIMER_LEDS_MILLI=1024, // 1 second
 };
-/*uint16_t AM_ROUTINGMSG=AM_SIMPLEROUTINGTREEMSG;
-uint16_t AM_NOTIFYPARENTMSG=AM_SIMPLEROUTINGTREEMSG;
-*/
 
 /*
 TODO: Εδώ δηλώνουμε τα είδη μηνυμάτων που θέλουμε να υπάρχουν
@@ -40,14 +35,36 @@ NOTE: Μέγιστο μέγεθος μηνύματος 29 bytes.
 typedef nx_struct RoutingMsg
 {
 	nx_uint16_t senderID;
-	nx_uint8_t depth;
+	nx_uint8_t queryType; // Το 'queryType' που επέλεξε ο κόμβος 0
+	nx_uint8_t epochSec; // Η διακεια εποχής που επέλεξε ο κόμβος 0
+	
 } RoutingMsg;
 
-typedef nx_struct NotifyParentMsg
+typedef nx_struct SumAggMsg
 {
-	nx_uint16_t senderID;
-	nx_uint16_t parentID;
-	nx_uint8_t depth;
-} NotifyParentMsg;
+	nx_uint16_t sum;
+	
+} SumAggMsg;
+
+typedef nx_struct AvgAggMsg
+{
+	nx_uint16_t sum;
+	nx_uint8_t count;
+	
+} AvgAggMsg;
+
+typedef nx_struct VarAggMsg
+{
+	nx_uint16_t sum;
+	nx_uint32_t sumSq;
+	nx_uint8_t count;
+	
+} VarAggMsg;
+
+typedef nx_struct MaxAggMsg
+{
+	nx_uint8_t maxVal;
+	
+} MaxAggMsg;
 
 #endif
