@@ -17,7 +17,7 @@ enum{
 
 	AM_ROUTINGMSG=22,
 
-	AM_AGGREGAREMSG = 23, // Νέο 'active message ID'
+	AM_AGGREGATEMSG = 23, // Νέο 'active message ID'
 
 	/* Μεταβλητές για κάποιους μετρητές. Οι μετρητές είναι σε milliseconds.
 	   ΠΡΟΣΟΧΗ: 1sec = 1024 μονάδες
@@ -37,6 +37,7 @@ typedef nx_struct RoutingMsg
 	nx_uint16_t senderID;
 	nx_uint8_t queryType; // Το 'queryType' που επέλεξε ο κόμβος 0
 	nx_uint8_t epochSec; // Η διακεια εποχής που επέλεξε ο κόμβος 0
+	nx_uint8_t depth;
 	
 } RoutingMsg;
 

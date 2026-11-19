@@ -7,22 +7,22 @@ implementation{
 	// Για κάθε είδος μηνυμάτων που ορίσαμε στο 'SimpleRoutingTree.h' φτιάχνουμε 2 components για το συγκεριμένο 'active message ID'
 	components new AMSenderC(AM_ROUTINGMSG) as RoutingSenderC;
 	components new AMReceiverC(AM_ROUTINGMSG) as RoutingReceiverC;
-	components new AMSenderC(AM_NOTIFYPARENTMSG) as NotifySenderC;
-	components new AMReceiverC(AM_NOTIFYPARENTMSG) as NotifyReceiverC;
+	//components new AMSenderC(AM_NOTIFYPARENTMSG) as NotifySenderC;
+	//components new AMReceiverC(AM_NOTIFYPARENTMSG) as NotifyReceiverC;
 
-	components new AMSenderC(AM_AGGREGAREMSG) as AggSenderC;
-	components new AMReceiverC(AM_AGGREGAREMSG) as AggReceiverC;
+	components new AMSenderC(AM_AGGREGATEMSG) as AggSenderC;
+	components new AMReceiverC(AM_AGGREGATEMSG) as AggReceiverC;
 
 	// Εδώ έχουμε τις ουρές για κάθε είδος μηνλυματος, μια ουρά για αποστολή και μια για παραλαβή
 	components new PacketQueueC(SENDER_QUEUE_SIZE) as RoutingSendQueueC;
 	components new PacketQueueC(RECEIVER_QUEUE_SIZE) as RoutingReceiveQueueC;
-	components new PacketQueueC(SENDER_QUEUE_SIZE) as NotifySendQueueC;
-	components new PacketQueueC(RECEIVER_QUEUE_SIZE) as NotifyReceiveQueueC;
+	//components new PacketQueueC(SENDER_QUEUE_SIZE) as NotifySendQueueC;
+	//components new PacketQueueC(RECEIVER_QUEUE_SIZE) as NotifyReceiveQueueC;
 
 	components new PacketQueueC(SENDER_QUEUE_SIZE) as AggSendQueueC;
 	components new PacketQueueC(RECEIVER_QUEUE_SIZE) as AggReceiveQueueC;
 	
-	components MainC, ActiveMessageC, SerialActiveMessageC, RandomC;
+	components MainC, ActiveMessageC, SerialActiveMessageC, LedC, RandomC;
 
 	// Εδώ έχουμε κάποιους μετρητές
 	components new TimerMilliC() as Led0TimerC;
