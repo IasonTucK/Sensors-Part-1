@@ -30,6 +30,8 @@ implementation{
 	components new TimerMilliC() as Led1TimerC;
 	components new TimerMilliC() as Led2TimerC;
 	components new TimerMilliC() as RoutingMsgTimerC;
+	// [Βήμα 4] ΠΡΟΣΘΗΚΗ: Ο μετρητής της εποχής (χρονοπρογραμματισμός TAG βάσει βάθους).
+	components new TimerMilliC() as EpochTimerC;
 	// [Βήμα 1] ΑΦΑΙΡΕΣΗ: 'components new TimerMilliC() as LostTaskTimerC;' (ο LostTaskTimer δεν ξεκινούσε ποτέ, νεκρός κώδικας).
 
 	// Εδώ δηλώνουμε τα 'interfaces' που θα χρησιμοποιήσουμε. Όλα αυτά τα 'interfaces' είναι δηλωμένα στο άλλο αρχείο και εδώ κάνουμε το wiring.
@@ -43,6 +45,7 @@ implementation{
 	SRTreeC.Led1Timer-> Led1TimerC;
 	SRTreeC.Led2Timer-> Led2TimerC;
 	SRTreeC.RoutingMsgTimer->RoutingMsgTimerC;
+	SRTreeC.EpochTimer->EpochTimerC; // [Βήμα 4] ΠΡΟΣΘΗΚΗ
 	// [Βήμα 1] ΑΦΑΙΡΕΣΗ: 'SRTreeC.LostTaskTimer->LostTaskTimerC;'
 
 	SRTreeC.RoutingPacket->RoutingSenderC.Packet;
@@ -70,5 +73,7 @@ implementation{
 	SRTreeC.AggReceiveQueue->AggReceiveQueueC;
 
 	SRTreeC.Random->RandomC;
+	// [Βήμα 3] ΠΡΟΣΘΗΚΗ: Σύνδεση του SeedInit, για να ορίζουμε εμείς το seed της γεννήτριας τυχαίων αριθμών.
+	SRTreeC.SeedInit->RandomC.SeedInit;
 	
 }
