@@ -1,81 +1,73 @@
-#include "SimpleRoutingTree.h"
+#ifndef SIMPLEROUTINGTREE_H
+#define SIMPLEROUTINGTREE_H
 
-configuration SRTreeAppC @safe() { }
-implementation{
-	components SRTreeC; // Είναι το module που θα έχει τον κώδικα μας
+/*
+Όταν θέλουμε να στείλουμε κάποιο μήνυμα, θα πρέπει να ορίσουμε κάπου ένα 'active message ID' (ακέραιος), το οποίο μπαίνει στην κεφαλή του μηνύματος. όταν ένας κόμβος θα λάβει το μήνυμα, θα πετάξει ένα 'eventReceived' για αυτό το 'active message ID'.
+Στο enum ορίζουμε τα διαθέσιμα 'active message IDs'. Πρέπει να είναι μοναδικά των 8-bits (δλδ μέχρι 255)
+*/
 
-	// Για κάθε είδος μηνυμάτων που ορίσαμε στο 'SimpleRoutingTree.h' φτιάχνουμε 2 components για το συγκεριμένο 'active message ID'
-	components new AMSenderC(AM_ROUTINGMSG) as RoutingSenderC;
-	components new AMReceiverC(AM_ROUTINGMSG) as RoutingReceiverC;
-	//components new AMSenderC(AM_NOTIFYPARENTMSG) as NotifySenderC;
-	//components new AMReceiverC(AM_NOTIFYPARENTMSG) as NotifyReceiverC;
+enum{
+	/*
+	Η ουρά των μηνυμάτων ενός κόμβου είναι:
+	1) Το πολύ 5 προς αποστολή (αν και πρακτικά θα έχω μόνο 1)
+	2) Το πολύ 16 προς παραλαβή
+	*/
+	SENDER_QUEUE_SIZE=5,
+	RECEIVER_QUEUE_SIZE=16,
 
-	components new AMSenderC(AM_AGGREGATEMSG) as AggSenderC;
-	components new AMReceiverC(AM_AGGREGATEMSG) as AggReceiverC;
+	AM_ROUTINGMSG=22,
 
-	// Εδώ έχουμε τις ουρές για κάθε είδος μηνλυματος, μια ουρά για αποστολή και μια για παραλαβή
-	components new PacketQueueC(SENDER_QUEUE_SIZE) as RoutingSendQueueC;
-	components new PacketQueueC(RECEIVER_QUEUE_SIZE) as RoutingReceiveQueueC;
-	//components new PacketQueueC(SENDER_QUEUE_SIZE) as NotifySendQueueC;
-	//components new PacketQueueC(RECEIVER_QUEUE_SIZE) as NotifyReceiveQueueC;
+	AM_AGGREGATEMSG = 23, // Νέο 'active message ID'
 
-	components new PacketQueueC(SENDER_QUEUE_SIZE) as AggSendQueueC;
-	components new PacketQueueC(RECEIVER_QUEUE_SIZE) as AggReceiveQueueC;
+	/* Μεταβλητές για κάποιους μετρητές. Οι μετρητές είναι σε milliseconds.
+	   ΠΡΟΣΟΧΗ: 1sec = 1024 μονάδες
+	*/
+	// [Βήμα 1] ΑΛΛΑΓΗ: Ήταν 'TIMER_FAST_PERIOD=0.2*1024'. Οι τιμές ενός enum πρέπει να είναι ακέραιες σταθερές,
+	// ενώ το 0.2*1024 = 204.8 είναι δεκαδικό και ο compiler το απορρίπτει. Γράφουμε το 205 (~0.2 sec).
+	TIMER_FAST_PERIOD=205, // 1/5 second
+	TIMER_LEDS_MILLI=1024, // 1 second
+};
+
+/*
+TODO: Εδώ δηλώνουμε τα είδη μηνυμάτων που θέλουμε να υπάρχουν
+
+NOTE: Αν προσθέω τύπο μηνύματος, να το προσθέσω και στο enum παραπάνω με έναν κωδικό.
+NOTE: Μέγιστο μέγεθος μηνύματος 29 bytes.
+*/
+typedef nx_struct RoutingMsg
+{
+	nx_uint16_t senderID;
+	nx_uint8_t queryType; // Το 'queryType' που επέλεξε ο κόμβος 0
+	nx_uint8_t epochSec; // Η διακεια εποχής που επέλεξε ο κόμβος 0
+	nx_uint8_t depth;
 	
-	components MainC, ActiveMessageC, SerialActiveMessageC, LedC, RandomC;
+} RoutingMsg;
 
-	// Εδώ έχουμε κάποιους μετρητές
-	components new TimerMilliC() as Led0TimerC;
-	components new TimerMilliC() as Led1TimerC;
-	components new TimerMilliC() as Led2TimerC;
-	components new TimerMilliC() as RoutingMsgTimerC;
-	components new TimerMilliC() as LostTaskTimerC;
+typedef nx_struct SumAggMsg
+{
+	nx_uint16_t sum;
 	
-	// Εδώ δηλώνουμε τα 'interfaces' που θα χρησιμοποιήσουμε. Όλα αυτά τα 'interfaces' είναι δηλωμένα στο άλλο αρχείο και εδώ κάνουμε το wiring.
-	// Όλα τα ονόματα που βλέπουμε μετά την τελίτσα είνα τα ονόματα που έχουμε ορίσει στο 'SRTreee.c'. Οπότε ότι καινούργιο 'interface' προσθέσουμε στο 'SRTreee.c', πρέπει να το συνδέσουμε εδώ για να βρίσεκι τον κώδικά του.
-	SRTreeC.Boot->MainC.Boot;
-	
-	SRTreeC.RadioControl -> ActiveMessageC;
-	SRTreeC.Leds-> LedsC;
-	
-	SRTreeC.Led0Timer-> Led0TimerC;
-	SRTreeC.Led1Timer-> Led1TimerC;
-	SRTreeC.Led2Timer-> Led2TimerC;
-	SRTreeC.RoutingMsgTimer->RoutingMsgTimerC;
-	SRTreeC.LostTaskTimer->LostTaskTimerC;
-	
-	SRTreeC.RoutingPacket->RoutingSenderC.Packet;
-	SRTreeC.RoutingAMPacket->RoutingSenderC.AMPacket;
+} SumAggMsg;
 
-	SRTreeC.AggPacket->AggSenderC.Packet;
-	SRTreeC.AggAMPacket->AggSenderC.AMPacket;	
-
-	SRTreeC.RoutingAMSend->RoutingSenderC.AMSend;
-	SRTreeC.RoutingReceive->RoutingReceiverC.Receive;
-
-	SRTreeC.AggAMSend->AggSenderC.AMSend;
-	SRTreeC.AggReceive->AggReceiveC.Receive;
+typedef nx_struct AvgAggMsg
+{
+	nx_uint16_t sum;
+	nx_uint8_t count;
 	
-	SRTreeC.NotifyPacket->NotifySenderC.Packet;
-	SRTreeC.NotifyAMPacket->NotifySenderC.AMPacket;
-	SRTreeC.NotifyAMSend->NotifySenderC.AMSend;
-	SRTreeC.NotifyReceive->NotifyReceiverC.Receive;
+} AvgAggMsg;
+
+typedef nx_struct VarAggMsg
+{
+	nx_uint16_t sum;
+	nx_uint32_t sumSq;
+	nx_uint8_t count;
 	
-#ifdef SERIAL_EN	
-	SRTreeC.SerialReceive->SerialAMReceiverC.Receive;
-	SRTreeC.SerialAMSend->SerialAMSenderC.AMSend;
-	SRTreeC.SerialAMPacket->SerialAMSenderC.AMPacket;
-	SRTreeC.SerialPacket->SerialAMSenderC.Packet;
-	SRTreeC.SerialControl->SerialActiveMessageC;
+} VarAggMsg;
+
+typedef nx_struct MaxAggMsg
+{
+	nx_uint8_t maxVal;
+	
+} MaxAggMsg;
+
 #endif
-	SRTreeC.RoutingSendQueue->RoutingSendQueueC;
-	SRTreeC.RoutingReceiveQueue->RoutingReceiveQueueC;
-	SRTreeC.NotifySendQueue->NotifySendQueueC;
-	SRTreeC.NotifyReceiveQueue->NotifyReceiveQueueC;
-
-	SRTreeC.AggSendQueue->AggSendQueueC;
-	SRTreeC.AggReceiveQueue->AggReceiveQueueC;
-
-	SRTreeC.Random->RandomC;
-	
-}
