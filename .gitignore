@@ -1,0 +1,6 @@
+simbuild/
+*.o
+*.so
+*.pyc
+*.swp
+*.swo
