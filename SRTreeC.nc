@@ -15,9 +15,8 @@ module SRTreeC
 	uses interface Boot;
 	uses interface Leds;
 	uses interface SplitControl as RadioControl;
-#ifdef SERIAL_EN
-	uses interface SplitControl as SerialControl;
-#endif
+	// [Βήμα 1] ΑΦΑΙΡΕΣΗ: 'uses interface SplitControl as SerialControl;' (μέσα σε #ifdef SERIAL_EN).
+	// Η σειριακή θύρα χρησιμοποιούνταν μόνο για να στέλνει η ρίζα τα NotifyParentMsg στο PC (πραγματικό hardware).
 
 	uses interface Packet as RoutingPacket;
 	uses interface AMSend as RoutingAMSend;
@@ -28,30 +27,27 @@ module SRTreeC
 	uses interface AMSend as AggAMSend;
 	uses interface AMPacket as AggAMPacket;
 	
-	uses interface AMSend as NotifyAMSend;
-	uses interface AMPacket as NotifyAMPacket;
-	uses interface Packet as NotifyPacket;
+	// [Βήμα 1] ΑΦΑΙΡΕΣΗ: Τα interfaces NotifyAMSend, NotifyAMPacket, NotifyPacket.
+	// Στο TAG δεν στέλνουμε NotifyParentMsg: ο πατέρας καταλαβαίνει τα παιδιά του όταν λάβει δεδομένα τους.
 
-#ifdef SERIAL_EN
-	uses interface AMSend as SerialAMSend;
-	uses interface AMPacket as SerialAMPacket;
-	uses interface Packet as SerialPacket;
-#endif
+	// [Βήμα 1] ΑΦΑΙΡΕΣΗ: Τα interfaces SerialAMSend, SerialAMPacket, SerialPacket (μέσα σε #ifdef SERIAL_EN).
 	uses interface Timer<TMilli> as Led0Timer;
 	uses interface Timer<TMilli> as Led1Timer;
 	uses interface Timer<TMilli> as Led2Timer;
 	uses interface Timer<TMilli> as RoutingMsgTimer;
-	uses interface Timer<TMilli> as LostTaskTimer;
+	// [Βήμα 1] ΑΦΑΙΡΕΣΗ: 'uses interface Timer<TMilli> as LostTaskTimer;'
+	// Η μόνη εντολή που τον ξεκινούσε ήταν σε σχόλιο, άρα δεν χτυπούσε ποτέ (νεκρός κώδικας).
 	
 	uses interface Receive as RoutingReceive;
-	uses interface Receive as NotifyReceive;
-	uses interface Receive as SerialReceive;
+	// [Βήμα 1] ΠΡΟΣΘΗΚΗ: Λήψη των δεδομένων συνάθροισης από τα παιδιά. Ήταν ήδη συνδεδεμένο στο SRTreeAppC.nc
+	// ('SRTreeC.AggReceive->...') αλλά δεν είχε δηλωθεί εδώ, οπότε δεν έκανε compile.
+	uses interface Receive as AggReceive;
+	// [Βήμα 1] ΑΦΑΙΡΕΣΗ: 'uses interface Receive as NotifyReceive;' και 'uses interface Receive as SerialReceive;'
 	
 	uses interface PacketQueue as RoutingSendQueue;
 	uses interface PacketQueue as RoutingReceiveQueue;
 	
-	uses interface PacketQueue as NotifySendQueue;
-	uses interface PacketQueue as NotifyReceiveQueue;
+	// [Βήμα 1] ΑΦΑΙΡΕΣΗ: Οι ουρές NotifySendQueue και NotifyReceiveQueue.
 
 	// Νέες ουρές για τα δεδομένα συνάθροισης
 	uses interface PacketQueue as AggSendQueue;
@@ -66,24 +62,15 @@ implementation
 	uint16_t  roundCounter; // Ορίζει σε ποιά εποχή είμαστε
 	
 	message_t radioRoutingSendPkt;
-	message_t radioNotifySendPkt;
-	
-	
-	message_t serialPkt;
-	//message_t serialRecPkt;
+	// [Βήμα 1] ΑΦΑΙΡΕΣΗ: 'message_t radioNotifySendPkt;' (NotifyParentMsg).
+	// [Βήμα 1] ΑΦΑΙΡΕΣΗ: 'message_t serialPkt;' και '//message_t serialRecPkt;' (σειριακή θύρα).
 	
 	// Αν είναι busy ο ασύρματος
 	bool RoutingSendBusy=FALSE;
-	bool NotifySendBusy=FALSE;
-
-#ifdef SERIAL_EN
-	bool serialBusy=FALSE;
-#endif
+	// [Βήμα 1] ΑΦΑΙΡΕΣΗ: 'bool NotifySendBusy=FALSE;' και 'bool serialBusy=FALSE;'
 	
-	bool lostRoutingSendTask=FALSE;
-	bool lostNotifySendTask=FALSE;
-	bool lostRoutingRecTask=FALSE;
-	bool lostNotifyRecTask=FALSE;
+	// [Βήμα 1] ΑΦΑΙΡΕΣΗ: Οι σημαίες lostRoutingSendTask, lostNotifySendTask, lostRoutingRecTask, lostNotifyRecTask.
+	// Τις διάβαζε μόνο το LostTaskTimer.fired(), που δεν εκτελούνταν ποτέ.
 	
 	// Αρχικοποιούνατι σε τιμές που λένε 'δε ξέρω το βάθος μου' και 'δεν ξέρω τον πατέρα μου' και έπειτα τα αλλάξουν
 	uint8_t curdepth; // Το τρέχον βάθος
@@ -91,54 +78,11 @@ implementation
 	
 	// Αυτά είναι 'tasks' που ορίζω παρακάτω
 	task void sendRoutingTask();
-	task void sendNotifyTask();
 	task void receiveRoutingTask();
-	task void receiveNotifyTask();
+	// [Βήμα 1] ΑΦΑΙΡΕΣΗ: Οι δηλώσεις των tasks sendNotifyTask() και receiveNotifyTask().
 	
-	void setLostRoutingSendTask(bool state)
-	{
-		atomic{
-			lostRoutingSendTask=state;
-		}
-		if(state==TRUE)
-		{
-			//call Leds.led2On();
-		}
-		else 
-		{
-			//call Leds.led2Off();
-		}
-	}
-	
-	void setLostNotifySendTask(bool state)
-	{
-		atomic{
-		lostNotifySendTask=state;
-		}
-		
-		if(state==TRUE)
-		{
-			//call Leds.led2On();
-		}
-		else 
-		{
-			//call Leds.led2Off();
-		}
-	}
-	
-	void setLostNotifyRecTask(bool state)
-	{
-		atomic{
-		lostNotifyRecTask=state;
-		}
-	}
-	
-	void setLostRoutingRecTask(bool state)
-	{
-		atomic{
-		lostRoutingRecTask=state;
-		}
-	}
+	// [Βήμα 1] ΑΦΑΙΡΕΣΗ: Οι συναρτήσεις setLostRoutingSendTask(), setLostNotifySendTask(), setLostNotifyRecTask(),
+	// setLostRoutingRecTask(). Άλλαζαν μόνο τις σημαίες lost* του νεκρού μηχανισμού 'lost task'.
 	void setRoutingSendBusy(bool state)
 	{
 		atomic{
@@ -155,58 +99,19 @@ implementation
 		}
 	}
 	
-	void setNotifySendBusy(bool state)
-	{
-		atomic{
-		NotifySendBusy=state;
-		}
-		dbg("SRTreeC","NotifySendBusy = %s\n", (state == TRUE)?"TRUE":"FALSE");
-#ifdef PRINTFDBG_MODE
-		printf("\t\t\t\t\t\tNotifySendBusy = %s\n", (state == TRUE)?"TRUE":"FALSE");
-#endif
-		
-		if(state==TRUE)
-		{
-			call Leds.led1On();
-			call Led1Timer.startOneShot(TIMER_LEDS_MILLI);
-		}
-		else 
-		{
-			//call Leds.led1Off();
-		}
-	}
-#ifdef SERIAL_EN
-	void setSerialBusy(bool state)
-	{
-		serialBusy=state;
-		if(state==TRUE)
-		{
-			call Leds.led2On();
-			call Led2Timer.startOneShot(TIMER_LEDS_MILLI);
-		}
-		else
-		{
-			//call Leds.led2Off();
-		}
-	}
-#endif
+	// [Βήμα 1] ΑΦΑΙΡΕΣΗ: Η setNotifySendBusy() (NotifyParentMsg) και η setSerialBusy() (σειριακή θύρα, μέσα σε #ifdef SERIAL_EN).
 	event void Boot.booted()
 	{
 		/////// arxikopoiisi radio kai serial
 		call RadioControl.start();
 		
 		setRoutingSendBusy(FALSE);
-		setNotifySendBusy(FALSE);
-#ifdef SERIAL_EN
-		setSerialBusy(FALSE);
-#endif
+		// [Βήμα 1] ΑΦΑΙΡΕΣΗ: 'setNotifySendBusy(FALSE);' και 'setSerialBusy(FALSE);'
 		roundCounter =0;
 		
 		if(TOS_NODE_ID==0)
 		{
-#ifdef SERIAL_EN
-			call SerialControl.start();
-#endif
+			// [Βήμα 1] ΑΦΑΙΡΕΣΗ: 'call SerialControl.start();' (η ρίζα δεν ανοίγει πλέον σειριακή θύρα).
 			curdepth=0;
 			parentID=0;
 			dbg("Boot", "curdepth = %d  ,  parentID= %d \n", curdepth , parentID);
@@ -266,62 +171,11 @@ implementation
 		printfflush();
 #endif
 	}
-	event void SerialControl.startDone(error_t err)
-	{
-		if (err == SUCCESS)
-		{
-			dbg("Serial" , "Serial initialized successfully! \n");
-#ifdef PRINTFDBG_MODE
-			printf("Serial initialized successfully! \n");
-			printfflush();
-#endif
-			//call RoutingMsgTimer.startPeriodic(TIMER_PERIOD_MILLI);
-		}
-		else
-		{
-			dbg("Serial" , "Serial initialization failed! Retrying... \n");
-#ifdef PRINTFDBG_MODE
-			printf("Serial initialization failed! Retrying... \n");
-			printfflush();
-#endif
-			call SerialControl.start();
-		}
-	}
-	event void SerialControl.stopDone(error_t err)
-	{
-		dbg("Serial", "Serial stopped! \n");
-#ifdef PRINTFDBG_MODE
-		printf("Serial stopped! \n");
-		printfflush();
-#endif
-	}
+	// [Βήμα 1] ΑΦΑΙΡΕΣΗ: Τα events SerialControl.startDone() και SerialControl.stopDone() (σειριακή θύρα).
 	
-	event void LostTaskTimer.fired()
-	{
-		if (lostRoutingSendTask)
-		{
-			post sendRoutingTask();
-			setLostRoutingSendTask(FALSE);
-		}
-		
-		if( lostNotifySendTask)
-		{
-			post sendNotifyTask();
-			setLostNotifySendTask(FALSE);
-		}
-		
-		if (lostRoutingRecTask)
-		{
-			post receiveRoutingTask();
-			setLostRoutingRecTask(FALSE);
-		}
-		
-		if ( lostNotifyRecTask)
-		{
-			post receiveNotifyTask();
-			setLostNotifyRecTask(FALSE);
-		}
-	}
+	// [Βήμα 1] ΑΦΑΙΡΕΣΗ: Το event LostTaskTimer.fired(). Ξαναέκανε post τα tasks που είχαν 'χαθεί', αλλά ο LostTaskTimer
+	// δεν ξεκινούσε ποτέ. Δεν χρειάζεται αντικατάσταση: αν η sendRoutingTask() βρει τον ασύρματο busy, το
+	// RoutingAMSend.sendDone() την ξανακάνει post μόλις τελειώσει η τρέχουσα αποστολή (αφού η ουρά δεν είναι άδεια).
 	
 	event void RoutingMsgTimer.fired()
 	{
@@ -336,18 +190,11 @@ implementation
 		printfflush();
 #endif
 
-		// Αν είσαι ο κόμβος 0, αύξηση την εποχή σου κατά 1 και ξεκιάει ένας άλλος μετρητής που θα βαρέσει μετά από 'TIMER_PERIOD_MILLI'
-		// TODO: Στο tag, το routing στέλνεται ΜΟΝΟ μια φορά. Εδώ στέλνεται σε κάθε εποχή, οπότε θέλει άλλαγμα
-		if (TOS_NODE_ID==0)
-		{
-			roundCounter+=1;
-			
-			dbg("SRTreeC", "\n ##################################### \n");
-			dbg("SRTreeC", "#######   ROUND   %u    ############## \n", roundCounter);
-			dbg("SRTreeC", "#####################################\n");
-			
-			call RoutingMsgTimer.startOneShot(TIMER_PERIOD_MILLI);
-		}
+		// [Βήμα 1] ΑΦΑΙΡΕΣΗ (TODO: 'Στο tag, το routing στέλνεται ΜΟΝΟ μια φορά'): Εδώ υπήρχε το μπλοκ
+		//   if (TOS_NODE_ID==0) { roundCounter+=1; <εκτύπωση ROUND>; call RoutingMsgTimer.startOneShot(TIMER_PERIOD_MILLI); }
+		// με το οποίο η ρίζα ξαναέστελνε routing μήνυμα (δηλαδή ξαναέχτιζε το δέντρο) κάθε TIMER_PERIOD_MILLI (~150 sec).
+		// Στο TAG η τοπολογία είναι στατική, οπότε το δέντρο χτίζεται ΜΙΑ φορά, στην αρχή.
+		// (Επιπλέον, το TIMER_PERIOD_MILLI δεν υπάρχει πια στο SimpleRoutingTree.h, οπότε δεν έκανε compile.)
 		
 		if(call RoutingSendQueue.full())
 		// Εδώ θα πρέπει να στειλώ τα routing μηνύματα
@@ -458,101 +305,22 @@ implementation
 		
 	}
 	
-	event void NotifyAMSend.sendDone(message_t *msg , error_t err)
-	{
-		dbg("SRTreeC", "A Notify package sent... %s \n",(err==SUCCESS)?"True":"False");
-#ifdef PRINTFDBG_MODE
-		printf("A Notify package sent... %s \n",(err==SUCCESS)?"True":"False");
-		printfflush();
-#endif
-		
+	// [Βήμα 1] ΑΦΑΙΡΕΣΗ: Τα events NotifyAMSend.sendDone() (NotifyParentMsg) και SerialAMSend.sendDone() (σειριακή θύρα).
 	
-		dbg("SRTreeC" , "Package sent %s \n", (err==SUCCESS)?"True":"False");
-#ifdef PRINTFDBG_MODE
-		printf("Package sent %s \n", (err==SUCCESS)?"True":"False");
-		printfflush();
-#endif
-		setNotifySendBusy(FALSE);
-		
-		if(!(call NotifySendQueue.empty()))
-		{
-			post sendNotifyTask();
-		}
-		//call Leds.led0Off();
-		
-		
+	// [Βήμα 1] ΠΡΟΣΘΗΚΗ: Κενό event για το AggAMSend. Το nesC απαιτεί να υλοποιούνται όλα τα events των interfaces
+	// που χρησιμοποιούμε, αλλιώς δεν κάνει compile ('AggAMSend.sendDone not implemented').
+	// Θα συμπληρωθεί στο βήμα της αποστολής των δεδομένων συνάθροισης.
+	event void AggAMSend.sendDone(message_t * msg , error_t err)
+	{
 	}
 	
-	event void SerialAMSend.sendDone(message_t* msg , error_t err)
+	// [Βήμα 1] ΠΡΟΣΘΗΚΗ: Κενό event για το AggReceive (ίδιος λόγος). Θα συμπληρωθεί στο βήμα της λήψης των δεδομένων συνάθροισης.
+	event message_t* AggReceive.receive( message_t * msg , void * payload, uint8_t len)
 	{
-		if ( &serialPkt == msg)
-		{
-			dbg("Serial" , "Package sent %s \n", (err==SUCCESS)?"True":"False");
-#ifdef PRINTFDBG_MODE
-			printf("Package sent %s \n", (err==SUCCESS)?"True":"False");
-			printfflush();
-#endif
-			setSerialBusy(FALSE);
-			
-			//call Leds.led2Off();
-		}
-	}
-	
-	
-	event message_t* NotifyReceive.receive( message_t* msg , void* payload , uint8_t len)
-	{
-		error_t enqueueDone;
-		message_t tmp;
-		uint16_t msource;
-		
-		msource = call NotifyAMPacket.source(msg);
-		
-		dbg("SRTreeC", "### NotifyReceive.receive() start ##### \n");
-		dbg("SRTreeC", "Something received!!!  from %u   %u \n",((NotifyParentMsg*) payload)->senderID, msource);
-#ifdef PRINTFDBG_MODE		
-		printf("Something Received!!!, len = %u , npm=%u , rm=%u\n",len, sizeof(NotifyParentMsg), sizeof(RoutingMsg));
-		printfflush();
-#endif
-
-		//if(len!=sizeof(NotifyParentMsg))
-		//{
-			//dbg("SRTreeC","\t\tUnknown message received!!!\n");
-//#ifdef PRINTFDBG_MODE
-			//printf("\t\t Unknown message received!!!\n");
-			//printfflush();
-//#endif
-			//return msg;http://courses.ece.tuc.gr/
-		//}
-		
-		//call Leds.led1On();
-		//call Led1Timer.startOneShot(TIMER_LEDS_MILLI);
-		atomic{
-		memcpy(&tmp,msg,sizeof(message_t));
-		//tmp=*(message_t*)msg;
-		}
-		enqueueDone=call NotifyReceiveQueue.enqueue(tmp);
-		
-		if( enqueueDone== SUCCESS)
-		{
-#ifdef PRINTFDBG_MODE
-			printf("posting receiveNotifyTask()!!!! \n");
-			printfflush();
-#endif
-			post receiveNotifyTask();
-		}
-		else
-		{
-			dbg("SRTreeC","NotifyMsg enqueue failed!!! \n");
-#ifdef PRINTFDBG_MODE
-			printf("NotifyMsg enqueue failed!!! \n");
-			printfflush();
-#endif			
-		}
-		
-		//call Leds.led1Off();
-		dbg("SRTreeC", "### NotifyReceive.receive() end ##### \n");
 		return msg;
 	}
+	
+	// [Βήμα 1] ΑΦΑΙΡΕΣΗ: Το event NotifyReceive.receive() (λήψη NotifyParentMsg).
 //	event message_t* Receive.receive(message_t* msg, void* payload, uint8_t len)
 
 	// Όταν λαμβάνουμε ένα μήνυμα, εκτελείται αυτό το event
@@ -568,7 +336,8 @@ implementation
 		dbg("SRTreeC", "Something received!!!  from %u  %u \n",((RoutingMsg*) payload)->senderID ,  msource);
 		//dbg("SRTreeC", "Something received!!!\n");
 #ifdef PRINTFDBG_MODE		
-		printf("Something Received!!!, len = %u , npm=%u , rm=%u\n",len, sizeof(NotifyParentMsg), sizeof(RoutingMsg));
+		// [Βήμα 1] ΑΛΛΑΓΗ: Αφαιρέθηκε το 'npm=%u' / 'sizeof(NotifyParentMsg)', γιατί ο τύπος NotifyParentMsg δεν υπάρχει πια.
+		printf("Something Received!!!, len = %u , rm=%u\n",len, sizeof(RoutingMsg));
 		printfflush();
 #endif
 		//call Leds.led1On();
@@ -612,16 +381,7 @@ implementation
 		return msg;
 	}
 	
-	event message_t* SerialReceive.receive(message_t* msg , void* payload , uint8_t len)
-	{
-		// when receiving from serial port
-		dbg("Serial","Received msg from serial port \n");
-#ifdef PRINTFDBG_MODE
-		printf("Reveived message from serial port \n");
-		printfflush();
-#endif
-		return msg;
-	}
+	// [Βήμα 1] ΑΦΑΙΡΕΣΗ: Το event SerialReceive.receive() (σειριακή θύρα).
 	
 	////////////// Tasks implementations //////////////////////////////
 	
@@ -656,7 +416,8 @@ implementation
 			printf(	"sendRoutingTask(): RoutingSendBusy= TRUE!!!\n");
 			printfflush();
 #endif
-			setLostRoutingSendTask(TRUE);
+			// [Βήμα 1] ΑΦΑΙΡΕΣΗ: 'setLostRoutingSendTask(TRUE);' (νεκρός μηχανισμός 'lost task').
+			// Δεν χάνεται τίποτα: το RoutingAMSend.sendDone() θα ξανακάνει post το task, αφού η ουρά δεν είναι άδεια.
 			return;
 		}
 		
@@ -698,89 +459,7 @@ implementation
 			//setRoutingSendBusy(FALSE);
 		}
 	}
-	/**
-	 * dequeues a message and sends it
-	 */
-	task void sendNotifyTask()
-	{
-		uint8_t mlen;//, skip;
-		error_t sendDone;
-		uint16_t mdest;
-		NotifyParentMsg* mpayload;
-		
-		//message_t radioNotifySendPkt;
-		
-#ifdef PRINTFDBG_MODE
-		printf("SendNotifyTask(): going to send one more package.\n");
-		printfflush();
-#endif
-		if (call NotifySendQueue.empty())
-		{
-			dbg("SRTreeC","sendNotifyTask(): Q is empty!\n");
-#ifdef PRINTFDBG_MODE		
-			printf("sendNotifyTask():Q is empty!\n");
-			printfflush();
-#endif
-			return;
-		}
-		
-		if(NotifySendBusy==TRUE)
-		{
-			dbg("SRTreeC","sendNotifyTask(): NotifySendBusy= TRUE!!!\n");
-#ifdef PRINTFDBG_MODE
-			printf(	"sendTask(): NotifySendBusy= TRUE!!!\n");
-			printfflush();
-#endif
-			setLostNotifySendTask(TRUE);
-			return;
-		}
-		
-		radioNotifySendPkt = call NotifySendQueue.dequeue();
-		
-		//call Leds.led2On();
-		//call Led2Timer.startOneShot(TIMER_LEDS_MILLI);
-		mlen=call NotifyPacket.payloadLength(&radioNotifySendPkt);
-		
-		mpayload= call NotifyPacket.getPayload(&radioNotifySendPkt,mlen);
-		
-		if(mlen!= sizeof(NotifyParentMsg))
-		{
-			dbg("SRTreeC", "\t\t sendNotifyTask(): Unknown message!!\n");
-#ifdef PRINTFDBG_MODE
-			printf("\t\t sendNotifyTask(): Unknown message!!\n");
-			printfflush();
-#endif
-			return;
-		}
-		
-		dbg("SRTreeC" , " sendNotifyTask(): mlen = %u  senderID= %u \n",mlen,mpayload->senderID);
-#ifdef PRINTFDBG_MODE
-		printf("\t\t\t\t sendNotifyTask(): mlen=%u\n",mlen);
-		printfflush();
-#endif
-		mdest= call NotifyAMPacket.destination(&radioNotifySendPkt);
-		
-		
-		sendDone=call NotifyAMSend.send(mdest,&radioNotifySendPkt, mlen);
-		
-		if ( sendDone== SUCCESS)
-		{
-			dbg("SRTreeC","sendNotifyTask(): Send returned success!!!\n");
-#ifdef PRINTFDBG_MODE
-			printf("sendNotifyTask(): Send returned success!!!\n");
-			printfflush();
-#endif
-			setNotifySendBusy(TRUE);
-		}
-		else
-		{
-			dbg("SRTreeC","send failed!!!\n");
-#ifdef PRINTFDBG_MODE
-			printf("SendNotifyTask(): send failed!!!\n");
-#endif
-			//setNotifySendBusy(FALSE);
-		}
-	}
+	// [Βήμα 1] ΑΦΑΙΡΕΣΗ: Το task sendNotifyTask() (αποστολή NotifyParentMsg).
 	////////////////////////////////////////////////////////////////////
 	//*****************************************************************/
 	///////////////////////////////////////////////////////////////////
@@ -790,7 +469,7 @@ implementation
 	
 	task void receiveRoutingTask()
 	{
-		message_t tmp;
+		// [Βήμα 1] ΑΦΑΙΡΕΣΗ: 'message_t tmp;' (το χρησιμοποιούσαν μόνο τα NotifyParentMsg που αφαιρέθηκαν).
 		uint8_t len;
 		message_t radioRoutingRecPkt;
 		
@@ -813,7 +492,7 @@ implementation
 				
 		if(len == sizeof(RoutingMsg)) // Σίγουρα θα έχει αυτό το μέγεθος
 		{
-			NotifyParentMsg* m;
+			// [Βήμα 1] ΑΦΑΙΡΕΣΗ: 'NotifyParentMsg* m;'
 			RoutingMsg * mpkt = (RoutingMsg*) (call RoutingPacket.getPayload(&radioRoutingRecPkt,len)); // Παίρνει ένα δείκτη στα δεδομένα του μηνύματος
 			
 			//if(TOS_NODE_ID >0)
@@ -840,34 +519,19 @@ implementation
 				printf("NodeID= %d : curdepth= %d , parentID= %d \n", TOS_NODE_ID ,curdepth , parentID);
 				printfflush();
 #endif
-				// TODO: Εδώ στένουμε ένα μήνυμα 'NotifyParentMsg', για να του πούμε ότι τον διαλέξαμε για πατέρα και ποιό είναι το βάθος μου. ΟΜΩΣ, στο TAG αυτό δεν το κάνουμε. Ένας κόμβος Α καταλαβαίνει ότι είναι πατέρας του Β, όταν λάβει δεδομένα του Β για το query (αφού τα παιδιά στέλνουν δεδομένα για το query μόνο στον πατέρα)
-				
-				m = (NotifyParentMsg *) (call NotifyPacket.getPayload(&tmp, sizeof(NotifyParentMsg)));
-				m->senderID=TOS_NODE_ID;
-				m->depth = curdepth;
-				m->parentID = parentID;
-				dbg("SRTreeC" , "receiveRoutingTask():NotifyParentMsg sending to node= %d... \n", parentID);
-#ifdef PRINTFDBG_MODE
-				printf("NotifyParentMsg NodeID= %d sent!!! \n", TOS_NODE_ID);
-				printfflush();
-#endif
-				call NotifyAMPacket.setDestination(&tmp, parentID);
-				call NotifyPacket.setPayloadLength(&tmp,sizeof(NotifyParentMsg));
+				// [Βήμα 1] ΠΡΟΣΘΗΚΗ: Εκτύπωση με dbg (το printf από πάνω τυπώνει μόνο σε πραγματικό hardware),
+				// ώστε να φαίνεται στην προσομοίωση το δέντρο που χτίστηκε.
+				dbg("SRTreeC" , "NodeID= %d : curdepth= %d , parentID= %d \n", TOS_NODE_ID ,curdepth , parentID);
+
+				// [Βήμα 1] ΑΦΑΙΡΕΣΗ (TODO: 'Εδώ στέλνουμε ένα μήνυμα NotifyParentMsg ... στο TAG αυτό δεν το κάνουμε'):
+				// Εδώ ο κόμβος έφτιαχνε ένα NotifyParentMsg (senderID, depth, parentID) και το έβαζε στην NotifySendQueue
+				// για τον πατέρα του. Στο TAG ένας κόμβος Α καταλαβαίνει ότι είναι πατέρας του Β όταν λάβει δεδομένα του Β
+				// για το query (αφού τα παιδιά στέλνουν δεδομένα μόνο στον πατέρα), οπότε το μήνυμα είναι περιττό.
 
 				// TODO: Κάποιος που έλαβε ένα 'routing message' για πρώτη φορά (και αποφάσισα ποιός είναι ο πατερας μου και έκανα τον χρονοπρογραμματισμό μου), πρέπει να στείλω αυτό το 'routing message' για να το ακούσουν και οι γειτονές μου
-				
-				if (call NotifySendQueue.enqueue(tmp)==SUCCESS)
-				{
-					dbg("SRTreeC", "receiveRoutingTask(): NotifyParentMsg enqueued in SendingQueue successfully!!!");
-#ifdef PRINTFDBG_MODE
-					printf("receiveRoutingTask(): NotifyParentMsg enqueued successfully!!!");
-					printfflush();
-#endif
-					if (call NotifySendQueue.size() == 1)
-					{
-						post sendNotifyTask();
-					}
-				}
+
+				// [Βήμα 1] ΑΦΑΙΡΕΣΗ: Το 'if (call NotifySendQueue.enqueue(tmp)==SUCCESS) { ... post sendNotifyTask(); }'
+				// που έβαζε το NotifyParentMsg στην ουρά αποστολής (συνέχεια της παραπάνω αφαίρεσης).
 
 				// Αν δεν είμαι ο κόμβος 0, ξεκίνα έναν μετρητή για να στείλεις το 'routing message'
 				if (TOS_NODE_ID!=0)
@@ -880,9 +544,8 @@ implementation
 				
 				if (( curdepth > mpkt->depth +1) || (mpkt->senderID==parentID))
 				{
-					uint16_t oldparentID = parentID;
+					// [Βήμα 1] ΑΦΑΙΡΕΣΗ: 'uint16_t oldparentID = parentID;' (χρειαζόταν μόνο για το NotifyParentMsg προς τον παλιό πατέρα).
 					
-				
 					parentID= call RoutingAMPacket.source(&radioRoutingRecPkt);//mpkt->senderID;
 					curdepth = mpkt->depth + 1;
 				
@@ -890,70 +553,17 @@ implementation
 					printf("NodeID= %d : curdepth= %d , parentID= %d \n", TOS_NODE_ID ,curdepth , parentID);
 					printfflush();
 #endif					
-									
+					// [Βήμα 1] ΠΡΟΣΘΗΚΗ: Εκτύπωση με dbg της αλλαγής πατέρα (για να φαίνεται στην προσομοίωση).
+					dbg("SRTreeC" , "NodeID= %d : NEW curdepth= %d , parentID= %d \n", TOS_NODE_ID ,curdepth , parentID);
 					
-					dbg("SRTreeC" , "NotifyParentMsg sending to node= %d... \n", oldparentID);
-#ifdef PRINTFDBG_MODE
-					printf("NotifyParentMsg sending to node=%d... \n", oldparentID);
-					printfflush();
-#endif
-					if ( (oldparentID<65535) || (oldparentID>0) || (oldparentID==parentID))
-					{
-						m = (NotifyParentMsg *) (call NotifyPacket.getPayload(&tmp, sizeof(NotifyParentMsg)));
-						m->senderID=TOS_NODE_ID;
-						m->depth = curdepth;
-						m->parentID = parentID;
-						
-						call NotifyAMPacket.setDestination(&tmp,oldparentID);
-						//call NotifyAMPacket.setType(&tmp,AM_NOTIFYPARENTMSG);
-						call NotifyPacket.setPayloadLength(&tmp,sizeof(NotifyParentMsg));
-								
-						if (call NotifySendQueue.enqueue(tmp)==SUCCESS)
-						{
-							dbg("SRTreeC", "receiveRoutingTask(): NotifyParentMsg enqueued in SendingQueue successfully!!!\n");
-#ifdef PRINTFDBG_MODE
-							printf("receiveRoutingTask(): NotifyParentMsg enqueued successfully!!!");
-							printfflush();
-#endif
-							if (call NotifySendQueue.size() == 1)
-							{
-								post sendNotifyTask();
-							}
-						}
-					}
+					// [Βήμα 1] ΑΦΑΙΡΕΣΗ: Τα 2 NotifyParentMsg που στέλνονταν εδώ, ένα στον παλιό πατέρα και ένα στον νέο.
+					// Στο TAG δεν χρειάζονται. Επιπλέον η συνθήκη του πρώτου,
+					// '(oldparentID<65535) || (oldparentID>0) || (oldparentID==parentID)', ήταν πάντα αληθής,
+					// οπότε στελνόταν μήνυμα ακόμα και όταν ο πατέρας δεν είχε αλλάξει.
+					
 					if (TOS_NODE_ID!=0)
 					{
 						call RoutingMsgTimer.startOneShot(TIMER_FAST_PERIOD);
-					}
-					// tha stelnei kai ena minima NotifyParentMsg 
-					// ston kainourio patera kai ston palio patera.
-					
-					if (oldparentID!=parentID)
-					{
-						m = (NotifyParentMsg *) (call NotifyPacket.getPayload(&tmp, sizeof(NotifyParentMsg)));
-						m->senderID=TOS_NODE_ID;
-						m->depth = curdepth;
-						m->parentID = parentID;
-						dbg("SRTreeC" , "receiveRoutingTask():NotifyParentMsg sending to node= %d... \n", parentID);
-#ifdef PRINTFDBG_MODE
-						printf("NotifyParentMsg NodeID= %d sent!!! \n", TOS_NODE_ID);
-						printfflush();
-#endif
-						call NotifyAMPacket.setDestination(&tmp, parentID);
-						call NotifyPacket.setPayloadLength(&tmp,sizeof(NotifyParentMsg));
-						
-						if (call NotifySendQueue.enqueue(tmp)==SUCCESS)
-						{
-							dbg("SRTreeC", "receiveRoutingTask(): NotifyParentMsg enqueued in SendingQueue successfully!!! \n");
-#ifdef PRINTFDBG_MODE					
-							printf("receiveRoutingTask(): NotifyParentMsg enqueued successfully!!!");
-							printfflush();
-#endif
-							if (call NotifySendQueue.size() == 1)
-							{
-								post sendNotifyTask();
-							}
-						}
 					}
 				}
 				
@@ -967,7 +577,7 @@ implementation
 			printf("receiveRoutingTask():Empty message!!! \n");
 			printfflush();
 #endif
-			setLostRoutingRecTask(TRUE);
+			// [Βήμα 1] ΑΦΑΙΡΕΣΗ: 'setLostRoutingRecTask(TRUE);' (νεκρός μηχανισμός 'lost task'). Το μήνυμα απλά αγνοείται.
 			return;
 		}
 		
@@ -979,112 +589,8 @@ implementation
 ////////////////////////////////////////////////////////////////////////	
 	
 	 
-	task void receiveNotifyTask()
-	{
-		message_t tmp;
-		uint8_t len;
-		message_t radioNotifyRecPkt;
-		
-#ifdef PRINTFDBG_MODE
-		printf("ReceiveNotifyTask():received msg...\n");
-		printfflush();
-#endif
-		radioNotifyRecPkt= call NotifyReceiveQueue.dequeue();
-		
-		len= call NotifyPacket.payloadLength(&radioNotifyRecPkt);
-		
-		dbg("SRTreeC","ReceiveNotifyTask(): len=%u \n",len);
-#ifdef PRINTFDBG_MODE
-		printf("ReceiveNotifyTask(): len=%u!\n",len);
-		printfflush();
-#endif
-		if(len == sizeof(NotifyParentMsg))
-		{
-			// an to parentID== TOS_NODE_ID tote
-			// tha proothei to minima pros tin riza xoris broadcast
-			// kai tha ananeonei ton tyxon pinaka paidion..
-			// allios tha diagrafei to paidi apo ton pinaka paidion
-			
-			NotifyParentMsg* mr = (NotifyParentMsg*) (call NotifyPacket.getPayload(&radioNotifyRecPkt,len));
-			
-			dbg("SRTreeC" , "NotifyParentMsg received from %d !!! \n", mr->senderID);
-#ifdef PRINTFDBG_MODE
-			printf("NodeID= %d NotifyParentMsg from senderID = %d!!! \n",TOS_NODE_ID , mr->senderID);
-			printfflush();
-#endif
-			if ( mr->parentID == TOS_NODE_ID)
-			{
-				// tote prosthiki stin lista ton paidion.
-				
-			}
-			else
-			{
-				// apla diagrafei ton komvo apo paidi tou..
-				
-			}
-			if ( TOS_NODE_ID==0)
-			{
-#ifdef SERIAL_EN
-				if (!serialBusy)
-				{ // mipos mporei na mpei san task?
-					NotifyParentMsg * m = (NotifyParentMsg *) (call SerialPacket.getPayload(&serialPkt, sizeof(NotifyParentMsg)));
-					m->senderID=mr->senderID;
-					m->depth = mr->depth;
-					m->parentID = mr->parentID;
-					dbg("Serial", "Sending NotifyParentMsg to PC... \n");
-#ifdef PRINTFDBG_MODE
-					printf("Sending NotifyParentMsg to PC..\n");
-					printfflush();
-#endif
-					if (call SerialAMSend.send(parentID, &serialPkt, sizeof(NotifyParentMsg))==SUCCESS)
-					{
-						setSerialBusy(TRUE);
-					}
-				}
-#endif
-			}
-			else
-			{
-				NotifyParentMsg* m;
-				memcpy(&tmp,&radioNotifyRecPkt,sizeof(message_t));
-				
-				m = (NotifyParentMsg *) (call NotifyPacket.getPayload(&tmp, sizeof(NotifyParentMsg)));
-				//m->senderID=mr->senderID;
-				//m->depth = mr->depth;
-				//m->parentID = mr->parentID;
-				
-				dbg("SRTreeC" , "Forwarding NotifyParentMsg from senderID= %d  to parentID=%d \n" , m->senderID, parentID);
-#ifdef PRINTFDBG_MODE
-				printf("NotifyParentMsg NodeID= %d sent!\n", TOS_NODE_ID);
-				printfflush();
-#endif
-				call NotifyAMPacket.setDestination(&tmp, parentID);
-				call NotifyPacket.setPayloadLength(&tmp,sizeof(NotifyParentMsg));
-				
-				if (call NotifySendQueue.enqueue(tmp)==SUCCESS)
-				{
-					dbg("SRTreeC", "receiveNotifyTask(): NotifyParentMsg enqueued in SendingQueue successfully!!!\n");
-					if (call NotifySendQueue.size() == 1)
-					{
-						post sendNotifyTask();
-					}
-				}
-
-				
-			}
-			
-		}
-		else
-		{
-			dbg("SRTreeC","receiveNotifyTask():Empty message!!! \n");
-#ifdef PRINTFDBG_MODE
-			printf("receiveNotifyTask():Empty message!!! \n");
-			printfflush();
-#endif
-			setLostNotifyRecTask(TRUE);
-			return;
-		}
-		
-	}
+	// [Βήμα 1] ΑΦΑΙΡΕΣΗ: Το task receiveNotifyTask(). Επεξεργαζόταν τα NotifyParentMsg: οι κλάδοι 'προσθήκη/διαγραφή παιδιού'
+	// ήταν κενοί, η ρίζα τα έστελνε στο PC μέσω σειριακής, και οι υπόλοιποι κόμβοι τα προωθούσαν στον πατέρα τους
+	// μέχρι τη ρίζα (πολλές περιττές μεταδόσεις).
 	
 }
