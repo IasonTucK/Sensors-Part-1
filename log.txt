@@ -1,0 +1,386 @@
+TicksPerSecond :  10000000000 
+
+  0   1   -50.0
+  1   0   -50.0
+  1   4   -50.0
+  4   1   -50.0
+  1   7   -50.0
+  7   1   -50.0
+  1   2   -50.0
+  2   1   -50.0
+  4   5   -50.0
+  5   4   -50.0
+0:0:10.000000000 DEBUG (0): curdepth = 0  ,  parentID= 0 
+0:0:10.000000000 DEBUG (1): curdepth = 255  ,  parentID= 65535 
+0:0:10.000000000 DEBUG (2): curdepth = 255  ,  parentID= 65535 
+0:0:10.000000000 DEBUG (3): curdepth = 255  ,  parentID= 65535 
+0:0:10.000000000 DEBUG (4): curdepth = 255  ,  parentID= 65535 
+0:0:10.000000000 DEBUG (5): curdepth = 255  ,  parentID= 65535 
+0:0:10.000000000 DEBUG (6): curdepth = 255  ,  parentID= 65535 
+0:0:10.000000000 DEBUG (7): curdepth = 255  ,  parentID= 65535 
+0:0:10.000000000 DEBUG (8): curdepth = 255  ,  parentID= 65535 
+0:0:10.000000000 DEBUG (9): curdepth = 255  ,  parentID= 65535 
+0:0:10.000000010 DEBUG (0): Radio initialized successfully!!!
+0:0:10.000000010 DEBUG (0): ROOT: queryType= 4 (1=SUM, 2=AVG, 3=VARIANCE, 4=MAX) , epochSec= 40 
+0:0:10.000000010 DEBUG (0): NodeID= 0 : EpochTimer started, depth= 0 , first fire at 40960 ms, period 40960 ms 
+0:0:10.000000010 DEBUG (1): Radio initialized successfully!!!
+0:0:10.000000010 DEBUG (2): Radio initialized successfully!!!
+0:0:10.000000010 DEBUG (3): Radio initialized successfully!!!
+0:0:10.000000010 DEBUG (4): Radio initialized successfully!!!
+0:0:10.000000010 DEBUG (5): Radio initialized successfully!!!
+0:0:10.000000010 DEBUG (6): Radio initialized successfully!!!
+0:0:10.000000010 DEBUG (7): Radio initialized successfully!!!
+0:0:10.000000010 DEBUG (8): Radio initialized successfully!!!
+0:0:10.000000010 DEBUG (9): Radio initialized successfully!!!
+0:0:10.200195322 DEBUG (0): RoutingMsgTimer fired!  radioBusy = False 
+0:0:10.200195322 DEBUG (0): Sending RoutingMsg... 
+0:0:10.200195322 DEBUG (0): SendTask() posted!!
+0:0:10.200195322 DEBUG (0): RoutingMsg enqueued successfully in SendingQueue!!!
+0:0:10.200195332 DEBUG (0): sendRoutingTask(): Send returned success!!!
+0:0:10.208343478 DEBUG (1): ### RoutingReceive.receive() start ##### 
+0:0:10.208343478 DEBUG (1): Something received!!!  from 0 
+0:0:10.208343478 DEBUG (1): ### RoutingReceive.receive() end ##### 
+0:0:10.208343488 DEBUG (1): ReceiveRoutingTask(): len=3 
+0:0:10.208343488 DEBUG (1): receiveRoutingTask():senderID= 0 , depth= 0 
+0:0:10.208343488 DEBUG (1): NodeID= 1 : learned queryType= 4 , epochSec= 40 
+0:0:10.208343488 DEBUG (1): NodeID= 1 : EpochTimer started, depth= 1 , first fire at 40860 ms, period 40960 ms 
+0:0:10.208343488 DEBUG (1): NodeID= 1 : curdepth= 1 , parentID= 0 
+0:0:10.208511324 DEBUG (0): A Routing package sent... True 
+0:0:10.208511324 DEBUG (0): Package sent True 
+0:0:10.602539072 DEBUG (1): RoutingMsgTimer fired!  radioBusy = False 
+0:0:10.602539072 DEBUG (1): Sending RoutingMsg... 
+0:0:10.602539072 DEBUG (1): SendTask() posted!!
+0:0:10.602539072 DEBUG (1): RoutingMsg enqueued successfully in SendingQueue!!!
+0:0:10.602539082 DEBUG (1): sendRoutingTask(): Send returned success!!!
+0:0:10.612670859 DEBUG (2): ### RoutingReceive.receive() start ##### 
+0:0:10.612670859 DEBUG (2): Something received!!!  from 1 
+0:0:10.612670859 DEBUG (2): ### RoutingReceive.receive() end ##### 
+0:0:10.612670859 DEBUG (7): ### RoutingReceive.receive() start ##### 
+0:0:10.612670859 DEBUG (7): Something received!!!  from 1 
+0:0:10.612670859 DEBUG (7): ### RoutingReceive.receive() end ##### 
+0:0:10.612670859 DEBUG (4): ### RoutingReceive.receive() start ##### 
+0:0:10.612670859 DEBUG (4): Something received!!!  from 1 
+0:0:10.612670859 DEBUG (4): ### RoutingReceive.receive() end ##### 
+0:0:10.612670859 DEBUG (0): ### RoutingReceive.receive() start ##### 
+0:0:10.612670859 DEBUG (0): Something received!!!  from 1 
+0:0:10.612670859 DEBUG (0): ### RoutingReceive.receive() end ##### 
+0:0:10.612670869 DEBUG (2): ReceiveRoutingTask(): len=3 
+0:0:10.612670869 DEBUG (2): receiveRoutingTask():senderID= 1 , depth= 1 
+0:0:10.612670869 DEBUG (2): NodeID= 2 : learned queryType= 4 , epochSec= 40 
+0:0:10.612670869 DEBUG (2): NodeID= 2 : EpochTimer started, depth= 2 , first fire at 40760 ms, period 40960 ms 
+0:0:10.612670869 DEBUG (2): NodeID= 2 : curdepth= 2 , parentID= 1 
+0:0:10.612670869 DEBUG (7): ReceiveRoutingTask(): len=3 
+0:0:10.612670869 DEBUG (7): receiveRoutingTask():senderID= 1 , depth= 1 
+0:0:10.612670869 DEBUG (7): NodeID= 7 : learned queryType= 4 , epochSec= 40 
+0:0:10.612670869 DEBUG (7): NodeID= 7 : EpochTimer started, depth= 2 , first fire at 40760 ms, period 40960 ms 
+0:0:10.612670869 DEBUG (7): NodeID= 7 : curdepth= 2 , parentID= 1 
+0:0:10.612670869 DEBUG (4): ReceiveRoutingTask(): len=3 
+0:0:10.612670869 DEBUG (4): receiveRoutingTask():senderID= 1 , depth= 1 
+0:0:10.612670869 DEBUG (4): NodeID= 4 : learned queryType= 4 , epochSec= 40 
+0:0:10.612670869 DEBUG (4): NodeID= 4 : EpochTimer started, depth= 2 , first fire at 40760 ms, period 40960 ms 
+0:0:10.612670869 DEBUG (4): NodeID= 4 : curdepth= 2 , parentID= 1 
+0:0:10.612670869 DEBUG (0): ReceiveRoutingTask(): len=3 
+0:0:10.612670869 DEBUG (0): receiveRoutingTask():senderID= 1 , depth= 1 
+0:0:10.612838705 DEBUG (1): A Routing package sent... True 
+0:0:10.612838705 DEBUG (1): Package sent True 
+0:0:10.860351572 DEBUG (4): RoutingMsgTimer fired!  radioBusy = False 
+0:0:10.860351572 DEBUG (4): Sending RoutingMsg... 
+0:0:10.860351572 DEBUG (4): SendTask() posted!!
+0:0:10.860351572 DEBUG (4): RoutingMsg enqueued successfully in SendingQueue!!!
+0:0:10.860351582 DEBUG (4): sendRoutingTask(): Send returned success!!!
+0:0:10.870452842 DEBUG (5): ### RoutingReceive.receive() start ##### 
+0:0:10.870452842 DEBUG (5): Something received!!!  from 4 
+0:0:10.870452842 DEBUG (5): ### RoutingReceive.receive() end ##### 
+0:0:10.870452842 DEBUG (1): ### RoutingReceive.receive() start ##### 
+0:0:10.870452842 DEBUG (1): Something received!!!  from 4 
+0:0:10.870452842 DEBUG (1): ### RoutingReceive.receive() end ##### 
+0:0:10.870452852 DEBUG (5): ReceiveRoutingTask(): len=3 
+0:0:10.870452852 DEBUG (5): receiveRoutingTask():senderID= 4 , depth= 2 
+0:0:10.870452852 DEBUG (5): NodeID= 5 : learned queryType= 4 , epochSec= 40 
+0:0:10.870452852 DEBUG (5): NodeID= 5 : EpochTimer started, depth= 3 , first fire at 40660 ms, period 40960 ms 
+0:0:10.870452852 DEBUG (5): NodeID= 5 : curdepth= 3 , parentID= 4 
+0:0:10.870452852 DEBUG (1): ReceiveRoutingTask(): len=3 
+0:0:10.870452852 DEBUG (1): receiveRoutingTask():senderID= 4 , depth= 2 
+0:0:10.870620688 DEBUG (4): A Routing package sent... True 
+0:0:10.870620688 DEBUG (4): Package sent True 
+0:0:10.914062510 DEBUG (7): RoutingMsgTimer fired!  radioBusy = False 
+0:0:10.914062510 DEBUG (7): Sending RoutingMsg... 
+0:0:10.914062510 DEBUG (7): SendTask() posted!!
+0:0:10.914062510 DEBUG (7): RoutingMsg enqueued successfully in SendingQueue!!!
+0:0:10.914062520 DEBUG (7): sendRoutingTask(): Send returned success!!!
+0:0:10.918365474 DEBUG (1): ### RoutingReceive.receive() start ##### 
+0:0:10.918365474 DEBUG (1): Something received!!!  from 7 
+0:0:10.918365474 DEBUG (1): ### RoutingReceive.receive() end ##### 
+0:0:10.918365484 DEBUG (1): ReceiveRoutingTask(): len=3 
+0:0:10.918365484 DEBUG (1): receiveRoutingTask():senderID= 7 , depth= 2 
+0:0:10.918533319 DEBUG (7): A Routing package sent... True 
+0:0:10.918533319 DEBUG (7): Package sent True 
+0:0:11.003906260 DEBUG (2): RoutingMsgTimer fired!  radioBusy = False 
+0:0:11.003906260 DEBUG (2): Sending RoutingMsg... 
+0:0:11.003906260 DEBUG (2): SendTask() posted!!
+0:0:11.003906260 DEBUG (2): RoutingMsg enqueued successfully in SendingQueue!!!
+0:0:11.003906270 DEBUG (2): sendRoutingTask(): Send returned success!!!
+0:0:11.010681133 DEBUG (1): ### RoutingReceive.receive() start ##### 
+0:0:11.010681133 DEBUG (1): Something received!!!  from 2 
+0:0:11.010681133 DEBUG (1): ### RoutingReceive.receive() end ##### 
+0:0:11.010681143 DEBUG (1): ReceiveRoutingTask(): len=3 
+0:0:11.010681143 DEBUG (1): receiveRoutingTask():senderID= 2 , depth= 2 
+0:0:11.010848978 DEBUG (2): A Routing package sent... True 
+0:0:11.010848978 DEBUG (2): Package sent True 
+0:0:11.115234385 DEBUG (5): RoutingMsgTimer fired!  radioBusy = False 
+0:0:11.115234385 DEBUG (5): Sending RoutingMsg... 
+0:0:11.115234385 DEBUG (5): SendTask() posted!!
+0:0:11.115234385 DEBUG (5): RoutingMsg enqueued successfully in SendingQueue!!!
+0:0:11.115234395 DEBUG (5): sendRoutingTask(): Send returned success!!!
+0:0:11.121765119 DEBUG (4): ### RoutingReceive.receive() start ##### 
+0:0:11.121765119 DEBUG (4): Something received!!!  from 5 
+0:0:11.121765119 DEBUG (4): ### RoutingReceive.receive() end ##### 
+0:0:11.121765129 DEBUG (4): ReceiveRoutingTask(): len=3 
+0:0:11.121765129 DEBUG (4): receiveRoutingTask():senderID= 5 , depth= 3 
+0:0:11.121932964 DEBUG (5): A Routing package sent... True 
+0:0:11.121932964 DEBUG (5): Package sent True 
+0:0:49.707031260 DEBUG (5): 0:0:49.707031260 NodeID= 5 : EpochTimer fired, epoch= 1 , depth= 3 
+0:0:49.804687510 DEBUG (2): 0:0:49.804687510 NodeID= 2 : EpochTimer fired, epoch= 1 , depth= 2 
+0:0:49.804687510 DEBUG (4): 0:0:49.804687510 NodeID= 4 : EpochTimer fired, epoch= 1 , depth= 2 
+0:0:49.804687510 DEBUG (7): 0:0:49.804687510 NodeID= 7 : EpochTimer fired, epoch= 1 , depth= 2 
+0:0:49.902343760 DEBUG (1): 0:0:49.902343760 NodeID= 1 : EpochTimer fired, epoch= 1 , depth= 1 
+0:0:50.000000010 DEBUG (0): 
+ ##################################### 
+0:0:50.000000010 DEBUG (0): #######   EPOCH   1    ############## 
+0:0:50.000000010 DEBUG (0): #####################################
+0:0:50.000000010 DEBUG (0): 0:0:50.000000010 NodeID= 0 : EpochTimer fired, epoch= 1 , depth= 0 
+0:1:29.707031260 DEBUG (5): 0:1:29.707031260 NodeID= 5 : EpochTimer fired, epoch= 2 , depth= 3 
+0:1:29.804687510 DEBUG (2): 0:1:29.804687510 NodeID= 2 : EpochTimer fired, epoch= 2 , depth= 2 
+0:1:29.804687510 DEBUG (4): 0:1:29.804687510 NodeID= 4 : EpochTimer fired, epoch= 2 , depth= 2 
+0:1:29.804687510 DEBUG (7): 0:1:29.804687510 NodeID= 7 : EpochTimer fired, epoch= 2 , depth= 2 
+0:1:29.902343760 DEBUG (1): 0:1:29.902343760 NodeID= 1 : EpochTimer fired, epoch= 2 , depth= 1 
+0:1:30.000000010 DEBUG (0): 
+ ##################################### 
+0:1:30.000000010 DEBUG (0): #######   EPOCH   2    ############## 
+0:1:30.000000010 DEBUG (0): #####################################
+0:1:30.000000010 DEBUG (0): 0:1:30.000000010 NodeID= 0 : EpochTimer fired, epoch= 2 , depth= 0 
+0:2:9.707031260 DEBUG (5): 0:2:9.707031260 NodeID= 5 : EpochTimer fired, epoch= 3 , depth= 3 
+0:2:9.804687510 DEBUG (2): 0:2:9.804687510 NodeID= 2 : EpochTimer fired, epoch= 3 , depth= 2 
+0:2:9.804687510 DEBUG (4): 0:2:9.804687510 NodeID= 4 : EpochTimer fired, epoch= 3 , depth= 2 
+0:2:9.804687510 DEBUG (7): 0:2:9.804687510 NodeID= 7 : EpochTimer fired, epoch= 3 , depth= 2 
+0:2:9.902343760 DEBUG (1): 0:2:9.902343760 NodeID= 1 : EpochTimer fired, epoch= 3 , depth= 1 
+0:2:10.000000010 DEBUG (0): 
+ ##################################### 
+0:2:10.000000010 DEBUG (0): #######   EPOCH   3    ############## 
+0:2:10.000000010 DEBUG (0): #####################################
+0:2:10.000000010 DEBUG (0): 0:2:10.000000010 NodeID= 0 : EpochTimer fired, epoch= 3 , depth= 0 
+0:2:49.707031260 DEBUG (5): 0:2:49.707031260 NodeID= 5 : EpochTimer fired, epoch= 4 , depth= 3 
+0:2:49.804687510 DEBUG (2): 0:2:49.804687510 NodeID= 2 : EpochTimer fired, epoch= 4 , depth= 2 
+0:2:49.804687510 DEBUG (4): 0:2:49.804687510 NodeID= 4 : EpochTimer fired, epoch= 4 , depth= 2 
+0:2:49.804687510 DEBUG (7): 0:2:49.804687510 NodeID= 7 : EpochTimer fired, epoch= 4 , depth= 2 
+0:2:49.902343760 DEBUG (1): 0:2:49.902343760 NodeID= 1 : EpochTimer fired, epoch= 4 , depth= 1 
+0:2:50.000000010 DEBUG (0): 
+ ##################################### 
+0:2:50.000000010 DEBUG (0): #######   EPOCH   4    ############## 
+0:2:50.000000010 DEBUG (0): #####################################
+0:2:50.000000010 DEBUG (0): 0:2:50.000000010 NodeID= 0 : EpochTimer fired, epoch= 4 , depth= 0 
+0:3:29.707031260 DEBUG (5): 0:3:29.707031260 NodeID= 5 : EpochTimer fired, epoch= 5 , depth= 3 
+0:3:29.804687510 DEBUG (2): 0:3:29.804687510 NodeID= 2 : EpochTimer fired, epoch= 5 , depth= 2 
+0:3:29.804687510 DEBUG (4): 0:3:29.804687510 NodeID= 4 : EpochTimer fired, epoch= 5 , depth= 2 
+0:3:29.804687510 DEBUG (7): 0:3:29.804687510 NodeID= 7 : EpochTimer fired, epoch= 5 , depth= 2 
+0:3:29.902343760 DEBUG (1): 0:3:29.902343760 NodeID= 1 : EpochTimer fired, epoch= 5 , depth= 1 
+0:3:30.000000010 DEBUG (0): 
+ ##################################### 
+0:3:30.000000010 DEBUG (0): #######   EPOCH   5    ############## 
+0:3:30.000000010 DEBUG (0): #####################################
+0:3:30.000000010 DEBUG (0): 0:3:30.000000010 NodeID= 0 : EpochTimer fired, epoch= 5 , depth= 0 
+0:4:9.707031260 DEBUG (5): 0:4:9.707031260 NodeID= 5 : EpochTimer fired, epoch= 6 , depth= 3 
+0:4:9.804687510 DEBUG (2): 0:4:9.804687510 NodeID= 2 : EpochTimer fired, epoch= 6 , depth= 2 
+0:4:9.804687510 DEBUG (4): 0:4:9.804687510 NodeID= 4 : EpochTimer fired, epoch= 6 , depth= 2 
+0:4:9.804687510 DEBUG (7): 0:4:9.804687510 NodeID= 7 : EpochTimer fired, epoch= 6 , depth= 2 
+0:4:9.902343760 DEBUG (1): 0:4:9.902343760 NodeID= 1 : EpochTimer fired, epoch= 6 , depth= 1 
+0:4:10.000000010 DEBUG (0): 
+ ##################################### 
+0:4:10.000000010 DEBUG (0): #######   EPOCH   6    ############## 
+0:4:10.000000010 DEBUG (0): #####################################
+0:4:10.000000010 DEBUG (0): 0:4:10.000000010 NodeID= 0 : EpochTimer fired, epoch= 6 , depth= 0 
+0:4:49.707031260 DEBUG (5): 0:4:49.707031260 NodeID= 5 : EpochTimer fired, epoch= 7 , depth= 3 
+0:4:49.804687510 DEBUG (2): 0:4:49.804687510 NodeID= 2 : EpochTimer fired, epoch= 7 , depth= 2 
+0:4:49.804687510 DEBUG (4): 0:4:49.804687510 NodeID= 4 : EpochTimer fired, epoch= 7 , depth= 2 
+0:4:49.804687510 DEBUG (7): 0:4:49.804687510 NodeID= 7 : EpochTimer fired, epoch= 7 , depth= 2 
+0:4:49.902343760 DEBUG (1): 0:4:49.902343760 NodeID= 1 : EpochTimer fired, epoch= 7 , depth= 1 
+0:4:50.000000010 DEBUG (0): 
+ ##################################### 
+0:4:50.000000010 DEBUG (0): #######   EPOCH   7    ############## 
+0:4:50.000000010 DEBUG (0): #####################################
+0:4:50.000000010 DEBUG (0): 0:4:50.000000010 NodeID= 0 : EpochTimer fired, epoch= 7 , depth= 0 
+0:5:29.707031260 DEBUG (5): 0:5:29.707031260 NodeID= 5 : EpochTimer fired, epoch= 8 , depth= 3 
+0:5:29.804687510 DEBUG (2): 0:5:29.804687510 NodeID= 2 : EpochTimer fired, epoch= 8 , depth= 2 
+0:5:29.804687510 DEBUG (4): 0:5:29.804687510 NodeID= 4 : EpochTimer fired, epoch= 8 , depth= 2 
+0:5:29.804687510 DEBUG (7): 0:5:29.804687510 NodeID= 7 : EpochTimer fired, epoch= 8 , depth= 2 
+0:5:29.902343760 DEBUG (1): 0:5:29.902343760 NodeID= 1 : EpochTimer fired, epoch= 8 , depth= 1 
+0:5:30.000000010 DEBUG (0): 
+ ##################################### 
+0:5:30.000000010 DEBUG (0): #######   EPOCH   8    ############## 
+0:5:30.000000010 DEBUG (0): #####################################
+0:5:30.000000010 DEBUG (0): 0:5:30.000000010 NodeID= 0 : EpochTimer fired, epoch= 8 , depth= 0 
+0:6:9.707031260 DEBUG (5): 0:6:9.707031260 NodeID= 5 : EpochTimer fired, epoch= 9 , depth= 3 
+0:6:9.804687510 DEBUG (2): 0:6:9.804687510 NodeID= 2 : EpochTimer fired, epoch= 9 , depth= 2 
+0:6:9.804687510 DEBUG (4): 0:6:9.804687510 NodeID= 4 : EpochTimer fired, epoch= 9 , depth= 2 
+0:6:9.804687510 DEBUG (7): 0:6:9.804687510 NodeID= 7 : EpochTimer fired, epoch= 9 , depth= 2 
+0:6:9.902343760 DEBUG (1): 0:6:9.902343760 NodeID= 1 : EpochTimer fired, epoch= 9 , depth= 1 
+0:6:10.000000010 DEBUG (0): 
+ ##################################### 
+0:6:10.000000010 DEBUG (0): #######   EPOCH   9    ############## 
+0:6:10.000000010 DEBUG (0): #####################################
+0:6:10.000000010 DEBUG (0): 0:6:10.000000010 NodeID= 0 : EpochTimer fired, epoch= 9 , depth= 0 
+0:6:49.707031260 DEBUG (5): 0:6:49.707031260 NodeID= 5 : EpochTimer fired, epoch= 10 , depth= 3 
+0:6:49.804687510 DEBUG (2): 0:6:49.804687510 NodeID= 2 : EpochTimer fired, epoch= 10 , depth= 2 
+0:6:49.804687510 DEBUG (4): 0:6:49.804687510 NodeID= 4 : EpochTimer fired, epoch= 10 , depth= 2 
+0:6:49.804687510 DEBUG (7): 0:6:49.804687510 NodeID= 7 : EpochTimer fired, epoch= 10 , depth= 2 
+0:6:49.902343760 DEBUG (1): 0:6:49.902343760 NodeID= 1 : EpochTimer fired, epoch= 10 , depth= 1 
+0:6:50.000000010 DEBUG (0): 
+ ##################################### 
+0:6:50.000000010 DEBUG (0): #######   EPOCH   10    ############## 
+0:6:50.000000010 DEBUG (0): #####################################
+0:6:50.000000010 DEBUG (0): 0:6:50.000000010 NodeID= 0 : EpochTimer fired, epoch= 10 , depth= 0 
+0:7:29.707031260 DEBUG (5): 0:7:29.707031260 NodeID= 5 : EpochTimer fired, epoch= 11 , depth= 3 
+0:7:29.804687510 DEBUG (2): 0:7:29.804687510 NodeID= 2 : EpochTimer fired, epoch= 11 , depth= 2 
+0:7:29.804687510 DEBUG (4): 0:7:29.804687510 NodeID= 4 : EpochTimer fired, epoch= 11 , depth= 2 
+0:7:29.804687510 DEBUG (7): 0:7:29.804687510 NodeID= 7 : EpochTimer fired, epoch= 11 , depth= 2 
+0:7:29.902343760 DEBUG (1): 0:7:29.902343760 NodeID= 1 : EpochTimer fired, epoch= 11 , depth= 1 
+0:7:30.000000010 DEBUG (0): 
+ ##################################### 
+0:7:30.000000010 DEBUG (0): #######   EPOCH   11    ############## 
+0:7:30.000000010 DEBUG (0): #####################################
+0:7:30.000000010 DEBUG (0): 0:7:30.000000010 NodeID= 0 : EpochTimer fired, epoch= 11 , depth= 0 
+0:8:9.707031260 DEBUG (5): 0:8:9.707031260 NodeID= 5 : EpochTimer fired, epoch= 12 , depth= 3 
+0:8:9.804687510 DEBUG (2): 0:8:9.804687510 NodeID= 2 : EpochTimer fired, epoch= 12 , depth= 2 
+0:8:9.804687510 DEBUG (4): 0:8:9.804687510 NodeID= 4 : EpochTimer fired, epoch= 12 , depth= 2 
+0:8:9.804687510 DEBUG (7): 0:8:9.804687510 NodeID= 7 : EpochTimer fired, epoch= 12 , depth= 2 
+0:8:9.902343760 DEBUG (1): 0:8:9.902343760 NodeID= 1 : EpochTimer fired, epoch= 12 , depth= 1 
+0:8:10.000000010 DEBUG (0): 
+ ##################################### 
+0:8:10.000000010 DEBUG (0): #######   EPOCH   12    ############## 
+0:8:10.000000010 DEBUG (0): #####################################
+0:8:10.000000010 DEBUG (0): 0:8:10.000000010 NodeID= 0 : EpochTimer fired, epoch= 12 , depth= 0 
+0:8:49.707031260 DEBUG (5): 0:8:49.707031260 NodeID= 5 : EpochTimer fired, epoch= 13 , depth= 3 
+0:8:49.804687510 DEBUG (2): 0:8:49.804687510 NodeID= 2 : EpochTimer fired, epoch= 13 , depth= 2 
+0:8:49.804687510 DEBUG (4): 0:8:49.804687510 NodeID= 4 : EpochTimer fired, epoch= 13 , depth= 2 
+0:8:49.804687510 DEBUG (7): 0:8:49.804687510 NodeID= 7 : EpochTimer fired, epoch= 13 , depth= 2 
+0:8:49.902343760 DEBUG (1): 0:8:49.902343760 NodeID= 1 : EpochTimer fired, epoch= 13 , depth= 1 
+0:8:50.000000010 DEBUG (0): 
+ ##################################### 
+0:8:50.000000010 DEBUG (0): #######   EPOCH   13    ############## 
+0:8:50.000000010 DEBUG (0): #####################################
+0:8:50.000000010 DEBUG (0): 0:8:50.000000010 NodeID= 0 : EpochTimer fired, epoch= 13 , depth= 0 
+0:9:29.707031260 DEBUG (5): 0:9:29.707031260 NodeID= 5 : EpochTimer fired, epoch= 14 , depth= 3 
+0:9:29.804687510 DEBUG (2): 0:9:29.804687510 NodeID= 2 : EpochTimer fired, epoch= 14 , depth= 2 
+0:9:29.804687510 DEBUG (4): 0:9:29.804687510 NodeID= 4 : EpochTimer fired, epoch= 14 , depth= 2 
+0:9:29.804687510 DEBUG (7): 0:9:29.804687510 NodeID= 7 : EpochTimer fired, epoch= 14 , depth= 2 
+0:9:29.902343760 DEBUG (1): 0:9:29.902343760 NodeID= 1 : EpochTimer fired, epoch= 14 , depth= 1 
+0:9:30.000000010 DEBUG (0): 
+ ##################################### 
+0:9:30.000000010 DEBUG (0): #######   EPOCH   14    ############## 
+0:9:30.000000010 DEBUG (0): #####################################
+0:9:30.000000010 DEBUG (0): 0:9:30.000000010 NodeID= 0 : EpochTimer fired, epoch= 14 , depth= 0 
+0:10:9.707031260 DEBUG (5): 0:10:9.707031260 NodeID= 5 : EpochTimer fired, epoch= 15 , depth= 3 
+0:10:9.804687510 DEBUG (2): 0:10:9.804687510 NodeID= 2 : EpochTimer fired, epoch= 15 , depth= 2 
+0:10:9.804687510 DEBUG (4): 0:10:9.804687510 NodeID= 4 : EpochTimer fired, epoch= 15 , depth= 2 
+0:10:9.804687510 DEBUG (7): 0:10:9.804687510 NodeID= 7 : EpochTimer fired, epoch= 15 , depth= 2 
+0:10:9.902343760 DEBUG (1): 0:10:9.902343760 NodeID= 1 : EpochTimer fired, epoch= 15 , depth= 1 
+0:10:10.000000010 DEBUG (0): 
+ ##################################### 
+0:10:10.000000010 DEBUG (0): #######   EPOCH   15    ############## 
+0:10:10.000000010 DEBUG (0): #####################################
+0:10:10.000000010 DEBUG (0): 0:10:10.000000010 NodeID= 0 : EpochTimer fired, epoch= 15 , depth= 0 
+0:10:49.707031260 DEBUG (5): 0:10:49.707031260 NodeID= 5 : EpochTimer fired, epoch= 16 , depth= 3 
+0:10:49.804687510 DEBUG (2): 0:10:49.804687510 NodeID= 2 : EpochTimer fired, epoch= 16 , depth= 2 
+0:10:49.804687510 DEBUG (4): 0:10:49.804687510 NodeID= 4 : EpochTimer fired, epoch= 16 , depth= 2 
+0:10:49.804687510 DEBUG (7): 0:10:49.804687510 NodeID= 7 : EpochTimer fired, epoch= 16 , depth= 2 
+0:10:49.902343760 DEBUG (1): 0:10:49.902343760 NodeID= 1 : EpochTimer fired, epoch= 16 , depth= 1 
+0:10:50.000000010 DEBUG (0): 
+ ##################################### 
+0:10:50.000000010 DEBUG (0): #######   EPOCH   16    ############## 
+0:10:50.000000010 DEBUG (0): #####################################
+0:10:50.000000010 DEBUG (0): 0:10:50.000000010 NodeID= 0 : EpochTimer fired, epoch= 16 , depth= 0 
+0:11:29.707031260 DEBUG (5): 0:11:29.707031260 NodeID= 5 : EpochTimer fired, epoch= 17 , depth= 3 
+0:11:29.804687510 DEBUG (2): 0:11:29.804687510 NodeID= 2 : EpochTimer fired, epoch= 17 , depth= 2 
+0:11:29.804687510 DEBUG (4): 0:11:29.804687510 NodeID= 4 : EpochTimer fired, epoch= 17 , depth= 2 
+0:11:29.804687510 DEBUG (7): 0:11:29.804687510 NodeID= 7 : EpochTimer fired, epoch= 17 , depth= 2 
+0:11:29.902343760 DEBUG (1): 0:11:29.902343760 NodeID= 1 : EpochTimer fired, epoch= 17 , depth= 1 
+0:11:30.000000010 DEBUG (0): 
+ ##################################### 
+0:11:30.000000010 DEBUG (0): #######   EPOCH   17    ############## 
+0:11:30.000000010 DEBUG (0): #####################################
+0:11:30.000000010 DEBUG (0): 0:11:30.000000010 NodeID= 0 : EpochTimer fired, epoch= 17 , depth= 0 
+0:12:9.707031260 DEBUG (5): 0:12:9.707031260 NodeID= 5 : EpochTimer fired, epoch= 18 , depth= 3 
+0:12:9.804687510 DEBUG (2): 0:12:9.804687510 NodeID= 2 : EpochTimer fired, epoch= 18 , depth= 2 
+0:12:9.804687510 DEBUG (4): 0:12:9.804687510 NodeID= 4 : EpochTimer fired, epoch= 18 , depth= 2 
+0:12:9.804687510 DEBUG (7): 0:12:9.804687510 NodeID= 7 : EpochTimer fired, epoch= 18 , depth= 2 
+0:12:9.902343760 DEBUG (1): 0:12:9.902343760 NodeID= 1 : EpochTimer fired, epoch= 18 , depth= 1 
+0:12:10.000000010 DEBUG (0): 
+ ##################################### 
+0:12:10.000000010 DEBUG (0): #######   EPOCH   18    ############## 
+0:12:10.000000010 DEBUG (0): #####################################
+0:12:10.000000010 DEBUG (0): 0:12:10.000000010 NodeID= 0 : EpochTimer fired, epoch= 18 , depth= 0 
+0:12:49.707031260 DEBUG (5): 0:12:49.707031260 NodeID= 5 : EpochTimer fired, epoch= 19 , depth= 3 
+0:12:49.804687510 DEBUG (2): 0:12:49.804687510 NodeID= 2 : EpochTimer fired, epoch= 19 , depth= 2 
+0:12:49.804687510 DEBUG (4): 0:12:49.804687510 NodeID= 4 : EpochTimer fired, epoch= 19 , depth= 2 
+0:12:49.804687510 DEBUG (7): 0:12:49.804687510 NodeID= 7 : EpochTimer fired, epoch= 19 , depth= 2 
+0:12:49.902343760 DEBUG (1): 0:12:49.902343760 NodeID= 1 : EpochTimer fired, epoch= 19 , depth= 1 
+0:12:50.000000010 DEBUG (0): 
+ ##################################### 
+0:12:50.000000010 DEBUG (0): #######   EPOCH   19    ############## 
+0:12:50.000000010 DEBUG (0): #####################################
+0:12:50.000000010 DEBUG (0): 0:12:50.000000010 NodeID= 0 : EpochTimer fired, epoch= 19 , depth= 0 
+0:13:29.707031260 DEBUG (5): 0:13:29.707031260 NodeID= 5 : EpochTimer fired, epoch= 20 , depth= 3 
+0:13:29.804687510 DEBUG (2): 0:13:29.804687510 NodeID= 2 : EpochTimer fired, epoch= 20 , depth= 2 
+0:13:29.804687510 DEBUG (4): 0:13:29.804687510 NodeID= 4 : EpochTimer fired, epoch= 20 , depth= 2 
+0:13:29.804687510 DEBUG (7): 0:13:29.804687510 NodeID= 7 : EpochTimer fired, epoch= 20 , depth= 2 
+0:13:29.902343760 DEBUG (1): 0:13:29.902343760 NodeID= 1 : EpochTimer fired, epoch= 20 , depth= 1 
+0:13:30.000000010 DEBUG (0): 
+ ##################################### 
+0:13:30.000000010 DEBUG (0): #######   EPOCH   20    ############## 
+0:13:30.000000010 DEBUG (0): #####################################
+0:13:30.000000010 DEBUG (0): 0:13:30.000000010 NodeID= 0 : EpochTimer fired, epoch= 20 , depth= 0 
+0:14:9.707031260 DEBUG (5): 0:14:9.707031260 NodeID= 5 : EpochTimer fired, epoch= 21 , depth= 3 
+0:14:9.804687510 DEBUG (2): 0:14:9.804687510 NodeID= 2 : EpochTimer fired, epoch= 21 , depth= 2 
+0:14:9.804687510 DEBUG (4): 0:14:9.804687510 NodeID= 4 : EpochTimer fired, epoch= 21 , depth= 2 
+0:14:9.804687510 DEBUG (7): 0:14:9.804687510 NodeID= 7 : EpochTimer fired, epoch= 21 , depth= 2 
+0:14:9.902343760 DEBUG (1): 0:14:9.902343760 NodeID= 1 : EpochTimer fired, epoch= 21 , depth= 1 
+0:14:10.000000010 DEBUG (0): 
+ ##################################### 
+0:14:10.000000010 DEBUG (0): #######   EPOCH   21    ############## 
+0:14:10.000000010 DEBUG (0): #####################################
+0:14:10.000000010 DEBUG (0): 0:14:10.000000010 NodeID= 0 : EpochTimer fired, epoch= 21 , depth= 0 
+0:14:49.707031260 DEBUG (5): 0:14:49.707031260 NodeID= 5 : EpochTimer fired, epoch= 22 , depth= 3 
+0:14:49.804687510 DEBUG (2): 0:14:49.804687510 NodeID= 2 : EpochTimer fired, epoch= 22 , depth= 2 
+0:14:49.804687510 DEBUG (4): 0:14:49.804687510 NodeID= 4 : EpochTimer fired, epoch= 22 , depth= 2 
+0:14:49.804687510 DEBUG (7): 0:14:49.804687510 NodeID= 7 : EpochTimer fired, epoch= 22 , depth= 2 
+0:14:49.902343760 DEBUG (1): 0:14:49.902343760 NodeID= 1 : EpochTimer fired, epoch= 22 , depth= 1 
+0:14:50.000000010 DEBUG (0): 
+ ##################################### 
+0:14:50.000000010 DEBUG (0): #######   EPOCH   22    ############## 
+0:14:50.000000010 DEBUG (0): #####################################
+0:14:50.000000010 DEBUG (0): 0:14:50.000000010 NodeID= 0 : EpochTimer fired, epoch= 22 , depth= 0 
+0:15:29.707031260 DEBUG (5): 0:15:29.707031260 NodeID= 5 : EpochTimer fired, epoch= 23 , depth= 3 
+0:15:29.804687510 DEBUG (2): 0:15:29.804687510 NodeID= 2 : EpochTimer fired, epoch= 23 , depth= 2 
+0:15:29.804687510 DEBUG (4): 0:15:29.804687510 NodeID= 4 : EpochTimer fired, epoch= 23 , depth= 2 
+0:15:29.804687510 DEBUG (7): 0:15:29.804687510 NodeID= 7 : EpochTimer fired, epoch= 23 , depth= 2 
+0:15:29.902343760 DEBUG (1): 0:15:29.902343760 NodeID= 1 : EpochTimer fired, epoch= 23 , depth= 1 
+0:15:30.000000010 DEBUG (0): 
+ ##################################### 
+0:15:30.000000010 DEBUG (0): #######   EPOCH   23    ############## 
+0:15:30.000000010 DEBUG (0): #####################################
+0:15:30.000000010 DEBUG (0): 0:15:30.000000010 NodeID= 0 : EpochTimer fired, epoch= 23 , depth= 0 
+0:16:9.707031260 DEBUG (5): 0:16:9.707031260 NodeID= 5 : EpochTimer fired, epoch= 24 , depth= 3 
+0:16:9.804687510 DEBUG (2): 0:16:9.804687510 NodeID= 2 : EpochTimer fired, epoch= 24 , depth= 2 
+0:16:9.804687510 DEBUG (4): 0:16:9.804687510 NodeID= 4 : EpochTimer fired, epoch= 24 , depth= 2 
+0:16:9.804687510 DEBUG (7): 0:16:9.804687510 NodeID= 7 : EpochTimer fired, epoch= 24 , depth= 2 
+0:16:9.902343760 DEBUG (1): 0:16:9.902343760 NodeID= 1 : EpochTimer fired, epoch= 24 , depth= 1 
+0:16:10.000000010 DEBUG (0): 
+ ##################################### 
+0:16:10.000000010 DEBUG (0): #######   EPOCH   24    ############## 
+0:16:10.000000010 DEBUG (0): #####################################
+0:16:10.000000010 DEBUG (0): 0:16:10.000000010 NodeID= 0 : EpochTimer fired, epoch= 24 , depth= 0 
+Node 0 connected with node 1 True True
+Node 0 connected with node 2 False False
+Node 1 connected with node 7 True True
+Node 2 connected with node 3 False False
+Node 4 connected with node 8 False False
