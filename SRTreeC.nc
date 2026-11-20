@@ -35,6 +35,9 @@ module SRTreeC
 	uses interface Timer<TMilli> as Led1Timer;
 	uses interface Timer<TMilli> as Led2Timer;
 	uses interface Timer<TMilli> as RoutingMsgTimer;
+	// [Βήμα 4] ΠΡΟΣΘΗΚΗ: Ο περιοδικός μετρητής της εποχής. Χτυπάει μία φορά ανά εποχή, τη στιγμή που ο κόμβος
+	// πρέπει να λειτουργήσει (ανάλογα με το βάθος του).
+	uses interface Timer<TMilli> as EpochTimer;
 	// [Βήμα 1] ΑΦΑΙΡΕΣΗ: 'uses interface Timer<TMilli> as LostTaskTimer;'
 	// Η μόνη εντολή που τον ξεκινούσε ήταν σε σχόλιο, άρα δεν χτυπούσε ποτέ (νεκρός κώδικας).
 	
@@ -54,6 +57,9 @@ module SRTreeC
 	uses interface PacketQueue as AggReceiveQueue;
 
 	uses interface Random; // Για παραγωγή τυχαίων αριθμών
+	// [Βήμα 3] ΠΡΟΣΘΗΚΗ: Αρχικοποίηση (seed) της γεννήτριας τυχαίων αριθμών. Χωρίς αυτό το RandomC ξεκινάει πάντα
+	// από seed = TOS_NODE_ID+1, άρα η ρίζα θα διάλεγε ΠΑΝΤΑ το ίδιο ερώτημα και την ίδια εποχή (όπως στο lab4).
+	uses interface ParameterInit<uint16_t> as SeedInit;
 }
 implementation
 {
@@ -75,6 +81,11 @@ implementation
 	// Αρχικοποιούνατι σε τιμές που λένε 'δε ξέρω το βάθος μου' και 'δεν ξέρω τον πατέρα μου' και έπειτα τα αλλάξουν
 	uint8_t curdepth; // Το τρέχον βάθος
 	uint16_t parentID; // Ποιός είναι ο πατέρας μου
+
+	// [Βήμα 3] ΠΡΟΣΘΗΚΗ: Οι παράμετροι του ερωτήματος. Τις διαλέγει τυχαία η ρίζα και τις μαθαίνουν οι υπόλοιποι κόμβοι
+	// από το RoutingMsg, κατά το χτίσιμο του δέντρου.
+	uint8_t queryType; // 1=SUM, 2=AVG, 3=VARIANCE, 4=MAX
+	uint8_t epochSec; // Διάρκεια εποχής σε δευτερόλεπτα (30, 40, ..., 100)
 	
 	// Αυτά είναι 'tasks' που ορίζω παρακάτω
 	task void sendRoutingTask();
@@ -83,6 +94,27 @@ implementation
 	
 	// [Βήμα 1] ΑΦΑΙΡΕΣΗ: Οι συναρτήσεις setLostRoutingSendTask(), setLostNotifySendTask(), setLostNotifyRecTask(),
 	// setLostRoutingRecTask(). Άλλαζαν μόνο τις σημαίες lost* του νεκρού μηχανισμού 'lost task'.
+
+	// [Βήμα 4] ΠΡΟΣΘΗΚΗ: Ξεκινάει (ή ξαναξεκινάει) τον περιοδικό μετρητή της εποχής, ανάλογα με το βάθος του κόμβου.
+	// Χρονοπρογραμματισμός του TAG: ένας κόμβος σε βάθος d χτυπάει d slots ΠΡΙΝ το τέλος κάθε εποχής:
+	//     1η φορά:   epochSec*1024 - curdepth*TIMER_SLOT_MILLI
+	//     μετά:      κάθε epochSec*1024
+	// Έτσι πρώτα λειτουργούν οι πιο βαθιοί κόμβοι, ένα slot μετά οι πατέρες τους κ.ο.κ., και τελευταία η ρίζα
+	// (βάθος 0), ακριβώς στο τέλος της εποχής. Η ρίζα έχει το αποτέλεσμα ήδη στο τέλος της 1ης εποχής.
+	// Το 'startPeriodicAt(t0, dt)' χτυπάει πρώτη φορά τη στιγμή t0+dt, οπότε δίνουμε t0 = -curdepth*TIMER_SLOT_MILLI
+	// (αρνητικό: οι πράξεις γίνονται modulo 2^32, όπως στο σχόλιο 'startPeriodicAt(-45*1024,60*1024)' του lab4).
+	// Ο χρόνος 0 είναι το boot του κόμβου (τοπικό ρολόι). Όλοι οι κόμβοι κάνουν boot σχεδόν ταυτόχρονα
+	// (mySimulation.py: 10 sec + i ticks), οπότε τα τέλη των εποχών συμπίπτουν σε όλο το δίκτυο.
+	void startEpochTimer()
+	{
+		uint32_t epochMilli = (uint32_t)epochSec * 1024;
+		uint32_t offset = (uint32_t)curdepth * TIMER_SLOT_MILLI;
+
+		call EpochTimer.startPeriodicAt((uint32_t)0 - offset, epochMilli);
+		dbg("SRTreeC", "NodeID= %d : EpochTimer started, depth= %u , first fire at %u ms, period %u ms \n",
+			TOS_NODE_ID, curdepth, epochMilli - offset, epochMilli);
+	}
+
 	void setRoutingSendBusy(bool state)
 	{
 		atomic{
@@ -108,6 +140,10 @@ implementation
 		setRoutingSendBusy(FALSE);
 		// [Βήμα 1] ΑΦΑΙΡΕΣΗ: 'setNotifySendBusy(FALSE);' και 'setSerialBusy(FALSE);'
 		roundCounter =0;
+
+		// [Βήμα 3] ΠΡΟΣΘΗΚΗ: Seed της γεννήτριας με τον χρόνο της προσομοίωσης τη στιγμή του boot (όπως στο lab4).
+		// Ο χρόνος αυτός εξαρτάται από το bootAtTime() του mySimulation.py.
+		call SeedInit.init(sim_time() % 1024);
 		
 		if(TOS_NODE_ID==0)
 		{
@@ -149,6 +185,15 @@ implementation
 			// Αν είσαι ο κόμβος 0, περίμενε λίγη ώρα να κάνουν 'boot' και οι υπόλοιποι αισθητήρες
 			if (TOS_NODE_ID==0)
 			{
+				// [Βήμα 3] ΠΡΟΣΘΗΚΗ: Η ρίζα διαλέγει τυχαία το ερώτημα και τη διάρκεια της εποχής, ΠΡΙΝ στείλει το
+				// πρώτο routing μήνυμα, ώστε να διαδοθούν μέσα σε αυτό σε όλο το δίκτυο (χωρίς επιπλέον μηνύματα).
+				queryType = (call Random.rand16() % 4) + 1; // 1..4
+				epochSec = ((call Random.rand16() % 8) + 3) * 10; // 3..10 επί 10 -> 30, 40, ..., 100 sec
+				dbg("SRTreeC", "ROOT: queryType= %u (1=SUM, 2=AVG, 3=VARIANCE, 4=MAX) , epochSec= %u \n", queryType, epochSec);
+
+				// [Βήμα 4] ΠΡΟΣΘΗΚΗ: Η ρίζα (βάθος 0) ξεκινάει τον μετρητή της εποχής: χτυπάει στο τέλος κάθε εποχής.
+				startEpochTimer();
+
 				call RoutingMsgTimer.startOneShot(TIMER_FAST_PERIOD);
 			}
 		}
@@ -219,9 +264,14 @@ implementation
 		}
 		// Εδώ γεμίζουμε τα περιεχόμενα του μηνύματος
 		atomic{
-		// TODO: Το να λέω μέσα στο μληνυμα το ποιός είμαι εγώ που το στέλνω είναι άσκοπο, αφού από το 'interface' AMPacket, είπαμε ότι αυτό αναφέρεται στην κεφαλή του πακέτου
-		mrpkt->senderID=TOS_NODE_ID; // Το ID του τρέχοντος κόμβου
+		// [Βήμα 2] ΑΦΑΙΡΕΣΗ (TODO: 'Το να λέω μέσα στο μήνυμα το ποιός είμαι εγώ που το στέλνω είναι άσκοπο, αφού από το
+		// interface AMPacket, είπαμε ότι αυτό αναφέρεται στην κεφαλή του πακέτου'): 'mrpkt->senderID=TOS_NODE_ID;'
+		// Το ActiveMessage βάζει αυτόματα τη διεύθυνση του αποστολέα στην κεφαλή κάθε πακέτου, οπότε ο παραλήπτης
+		// τη βρίσκει με 'call RoutingAMPacket.source(msg)'. Γλιτώνουμε 2 bytes σε κάθε routing μήνυμα.
 		mrpkt->depth = curdepth; // Το βάθος του τρέχοντος κόμβου
+		// [Βήμα 3] ΠΡΟΣΘΗΚΗ: Μαζί με το βάθος στέλνουμε και τις παραμέτρους του ερωτήματος, ώστε να τις μάθουν οι γείτονες.
+		mrpkt->queryType = queryType;
+		mrpkt->epochSec = epochSec;
 		}
 		dbg("SRTreeC" , "Sending RoutingMsg... \n");
 
@@ -266,6 +316,23 @@ implementation
 		}		
 	}
 	
+	// [Βήμα 4] ΠΡΟΣΘΗΚΗ: Χτυπάει μία φορά σε κάθε εποχή, στο slot του κόμβου (βλ. startEpochTimer()).
+	// Προς το παρόν μόνο μετράει τις εποχές και τυπώνει, για να ελέγξουμε τη σειρά (πρώτα τα παιδιά, μετά οι γονείς).
+	// Στο επόμενο βήμα εδώ θα γίνεται: νέα μέτρηση, συνάθροιση με τα δεδομένα των παιδιών και αποστολή στον πατέρα
+	// (ή, στη ρίζα, εκτύπωση του τελικού αποτελέσματος).
+	event void EpochTimer.fired()
+	{
+		roundCounter += 1;
+
+		if (TOS_NODE_ID==0)
+		{
+			dbg("SRTreeC", "\n ##################################### \n");
+			dbg("SRTreeC", "#######   EPOCH   %u    ############## \n", roundCounter);
+			dbg("SRTreeC", "#####################################\n");
+		}
+		dbg("SRTreeC", "%s NodeID= %d : EpochTimer fired, epoch= %u , depth= %u \n", sim_time_string(), TOS_NODE_ID, roundCounter, curdepth);
+	}
+
 	event void Led0Timer.fired()
 	{
 		call Leds.led0Off();
@@ -333,7 +400,9 @@ implementation
 		msource =call RoutingAMPacket.source(msg);
 		
 		dbg("SRTreeC", "### RoutingReceive.receive() start ##### \n");
-		dbg("SRTreeC", "Something received!!!  from %u  %u \n",((RoutingMsg*) payload)->senderID ,  msource);
+		// [Βήμα 2] ΑΛΛΑΓΗ: Ήταν '... from %u  %u \n",((RoutingMsg*) payload)->senderID , msource);'. Το senderID δεν υπάρχει πια,
+		// τυπώνουμε μόνο το msource (ο αποστολέας από την κεφαλή του πακέτου).
+		dbg("SRTreeC", "Something received!!!  from %u \n", msource);
 		//dbg("SRTreeC", "Something received!!!\n");
 #ifdef PRINTFDBG_MODE		
 		// [Βήμα 1] ΑΛΛΑΓΗ: Αφαιρέθηκε το 'npm=%u' / 'sizeof(NotifyParentMsg)', γιατί ο τύπος NotifyParentMsg δεν υπάρχει πια.
@@ -501,10 +570,11 @@ implementation
 			//}
 			//
 			
-			dbg("SRTreeC" , "receiveRoutingTask():senderID= %d , depth= %d \n", mpkt->senderID , mpkt->depth);
+			// [Βήμα 2] ΑΛΛΑΓΗ: Στις 2 εκτυπώσεις 'mpkt->senderID' -> 'call RoutingAMPacket.source(&radioRoutingRecPkt)' (το senderID αφαιρέθηκε).
+			dbg("SRTreeC" , "receiveRoutingTask():senderID= %d , depth= %d \n", call RoutingAMPacket.source(&radioRoutingRecPkt) , mpkt->depth);
 #ifdef PRINTFDBG_MODE
 			printf("NodeID= %d , RoutingMsg received! \n",TOS_NODE_ID);
-			printf("receiveRoutingTask():senderID= %d , depth= %d \n", mpkt->senderID , mpkt->depth);
+			printf("receiveRoutingTask():senderID= %d , depth= %d \n", call RoutingAMPacket.source(&radioRoutingRecPkt) , mpkt->depth);
 			printfflush();
 #endif
 			if ( (parentID<0)||(parentID>=65535))
@@ -513,8 +583,16 @@ implementation
 				//NOTE: Ο έξυπνιος τρόπος να βρούμε ποιός είναια υτός που έστειλε το μήνυμα είναι η source (αντί για mpkt->senderID)
 				parentID= call RoutingAMPacket.source(&radioRoutingRecPkt);//mpkt->senderID;
 				curdepth= mpkt->depth + 1; // Το τρέχον βάθος είναι +1 αυτού που μου έστειλε το μήνυμα
+				// [Βήμα 3] ΠΡΟΣΘΗΚΗ: Ο κόμβος μαθαίνει το ερώτημα και την εποχή που διάλεξε η ρίζα.
+				// (Αρκεί εδώ, την πρώτη φορά: όλα τα routing μηνύματα έχουν τις ίδιες τιμές.)
+				queryType = mpkt->queryType;
+				epochSec = mpkt->epochSec;
+				dbg("SRTreeC" , "NodeID= %d : learned queryType= %u , epochSec= %u \n", TOS_NODE_ID, queryType, epochSec);
 
-				// TODO: Στο TAG οι κόμβοι χρονοπρογραμματίζονται σύμφωνα με το βάθος τους. Οπότε εδώ που βρίσκουμε το βάθος, μπορούμε να ξεκινάμε έναν timer που θα λέει το πότε λειτουργεί ο κόμβος (συγκεκριμένα θα κάνουμε και χρήση του startPeriodical, ώστε να χτυπάει σε συγκεκριμένη περίοδο)
+				// [Βήμα 4] ΥΛΟΠΟΙΗΘΗΚΕ (TODO: 'Στο TAG οι κόμβοι χρονοπρογραμματίζονται σύμφωνα με το βάθος τους. Οπότε εδώ που
+				// βρίσκουμε το βάθος, μπορούμε να ξεκινάμε έναν timer που θα λέει το πότε λειτουργεί ο κόμβος (startPeriodic)'):
+				// Τώρα ξέρουμε το βάθος και την εποχή, οπότε ξεκινάμε τον περιοδικό μετρητή της εποχής (βλ. startEpochTimer()).
+				startEpochTimer();
 #ifdef PRINTFDBG_MODE
 				printf("NodeID= %d : curdepth= %d , parentID= %d \n", TOS_NODE_ID ,curdepth , parentID);
 				printfflush();
@@ -528,7 +606,12 @@ implementation
 				// για τον πατέρα του. Στο TAG ένας κόμβος Α καταλαβαίνει ότι είναι πατέρας του Β όταν λάβει δεδομένα του Β
 				// για το query (αφού τα παιδιά στέλνουν δεδομένα μόνο στον πατέρα), οπότε το μήνυμα είναι περιττό.
 
-				// TODO: Κάποιος που έλαβε ένα 'routing message' για πρώτη φορά (και αποφάσισα ποιός είναι ο πατερας μου και έκανα τον χρονοπρογραμματισμό μου), πρέπει να στείλω αυτό το 'routing message' για να το ακούσουν και οι γειτονές μου
+				// [Βήμα 3] ΥΛΟΠΟΙΗΘΗΚΕ (TODO: 'Κάποιος που έλαβε ένα routing message για πρώτη φορά [...] πρέπει να στείλω
+				// αυτό το routing message για να το ακούσουν και οι γείτονές μου'):
+				// Η προώθηση γίνεται από τον κώδικα που υπήρχε ήδη λίγο πιο κάτω: ο κόμβος ξεκινάει τον RoutingMsgTimer και,
+				// όταν αυτός χτυπήσει (μετά από TIMER_FAST_PERIOD), το RoutingMsgTimer.fired() κάνει broadcast ένα νέο
+				// RoutingMsg με το δικό του βάθος. Στο Βήμα 3 το μήνυμα αυτό μεταφέρει πλέον και τα queryType/epochSec
+				// (βλ. RoutingMsgTimer.fired()), οπότε το ερώτημα φτάνει σε όλους τους κόμβους μαζί με το δέντρο.
 
 				// [Βήμα 1] ΑΦΑΙΡΕΣΗ: Το 'if (call NotifySendQueue.enqueue(tmp)==SUCCESS) { ... post sendNotifyTask(); }'
 				// που έβαζε το NotifyParentMsg στην ουρά αποστολής (συνέχεια της παραπάνω αφαίρεσης).
@@ -536,13 +619,25 @@ implementation
 				// Αν δεν είμαι ο κόμβος 0, ξεκίνα έναν μετρητή για να στείλεις το 'routing message'
 				if (TOS_NODE_ID!=0)
 				{
-					call RoutingMsgTimer.startOneShot(TIMER_FAST_PERIOD);
+					// [Βήμα 3] ΑΛΛΑΓΗ: Ήταν 'call RoutingMsgTimer.startOneShot(TIMER_FAST_PERIOD);'
+					// Προστέθηκε τυχαία καθυστέρηση [0, TIMER_FAST_PERIOD). Με σταθερή καθυστέρηση, οι κόμβοι που άκουσαν το
+					// ίδιο routing μήνυμα (π.χ. όλα τα παιδιά της ρίζας) το ξαναέστελναν ΤΑΥΤΟΧΡΟΝΑ, τα μηνύματα συγκρούονταν
+					// και κάποιοι γείτονες δεν άκουγαν κανένα: στην προσομοίωση (grid 5x5, εμβέλεια 1) ένας κόμβος δεν μπήκε
+					// ποτέ στο δέντρο και άλλοι πήραν μεγαλύτερο βάθος από το ελάχιστο.
+					call RoutingMsgTimer.startOneShot(TIMER_FAST_PERIOD + (call Random.rand16() % TIMER_FAST_PERIOD));
 				}
 			}
 			else
 			{
 				
-				if (( curdepth > mpkt->depth +1) || (mpkt->senderID==parentID))
+				// [Βήμα 2] ΑΛΛΑΓΗ: Ήταν 'if (( curdepth > mpkt->depth +1) || (mpkt->senderID==parentID))'.
+				// Το 2ο σκέλος ('το μήνυμα ήρθε από τον πατέρα μου') αφαιρέθηκε μαζί με το senderID και δεν χρειάζεται:
+				//  - Στον αρχικό κώδικα η ρίζα ξανάστελνε routing σε κάθε γύρο, οπότε κάθε επανεκπομπή του πατέρα ανάγκαζε
+				//    το παιδί να ξαναστείλει κι αυτό routing (περιττές μεταδόσεις). Τώρα το δέντρο χτίζεται μία φορά (Βήμα 1).
+				//  - Ο πατέρας ξαναστέλνει routing μόνο όταν βρει μικρότερο βάθος. Τότε για το παιδί ισχύει ήδη
+				//    curdepth = (παλιό βάθος πατέρα)+1 > (νέο βάθος πατέρα)+1, άρα το 1ο σκέλος αρκεί.
+				// Έτσι ένας κόμβος αλλάζει πατέρα (και ξαναστέλνει routing) ΜΟΝΟ αν βρει συντομότερο μονοπάτι προς τη ρίζα.
+				if ( curdepth > mpkt->depth +1)
 				{
 					// [Βήμα 1] ΑΦΑΙΡΕΣΗ: 'uint16_t oldparentID = parentID;' (χρειαζόταν μόνο για το NotifyParentMsg προς τον παλιό πατέρα).
 					
@@ -555,6 +650,10 @@ implementation
 #endif					
 					// [Βήμα 1] ΠΡΟΣΘΗΚΗ: Εκτύπωση με dbg της αλλαγής πατέρα (για να φαίνεται στην προσομοίωση).
 					dbg("SRTreeC" , "NodeID= %d : NEW curdepth= %d , parentID= %d \n", TOS_NODE_ID ,curdepth , parentID);
+
+					// [Βήμα 4] ΠΡΟΣΘΗΚΗ: Το βάθος άλλαξε, άρα αλλάζει και η στιγμή που λειτουργεί ο κόμβος μέσα στην εποχή.
+					// Ξαναξεκινάμε τον μετρητή (το startPeriodicAt αντικαθιστά την προηγούμενη ρύθμιση).
+					startEpochTimer();
 					
 					// [Βήμα 1] ΑΦΑΙΡΕΣΗ: Τα 2 NotifyParentMsg που στέλνονταν εδώ, ένα στον παλιό πατέρα και ένα στον νέο.
 					// Στο TAG δεν χρειάζονται. Επιπλέον η συνθήκη του πρώτου,
@@ -563,7 +662,8 @@ implementation
 					
 					if (TOS_NODE_ID!=0)
 					{
-						call RoutingMsgTimer.startOneShot(TIMER_FAST_PERIOD);
+						// [Βήμα 3] ΑΛΛΑΓΗ: Ίδια τυχαία καθυστέρηση με παραπάνω (ήταν 'startOneShot(TIMER_FAST_PERIOD)').
+						call RoutingMsgTimer.startOneShot(TIMER_FAST_PERIOD + (call Random.rand16() % TIMER_FAST_PERIOD));
 					}
 				}
 				
