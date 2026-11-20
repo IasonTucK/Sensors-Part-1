@@ -2,35 +2,37 @@
 
 configuration SRTreeAppC @safe() { }
 implementation{
-	components SRTreeC;
+	components SRTreeC; // Είναι το module που θα έχει τον κώδικα μας
 
-#if defined(DELUGE) //defined(DELUGE_BASESTATION) || defined(DELUGE_LIGHT_BASESTATION)
-	components DelugeC;
-#endif
-
-#ifdef PRINTFDBG_MODE
-		components PrintfC;
-#endif
+	// Για κάθε είδος μηνυμάτων που ορίσαμε στο 'SimpleRoutingTree.h' φτιάχνουμε 2 components για το συγκεριμένο 'active message ID'
 	components new AMSenderC(AM_ROUTINGMSG) as RoutingSenderC;
 	components new AMReceiverC(AM_ROUTINGMSG) as RoutingReceiverC;
-	components new AMSenderC(AM_NOTIFYPARENTMSG) as NotifySenderC;
-	components new AMReceiverC(AM_NOTIFYPARENTMSG) as NotifyReceiverC;
-#ifdef SERIAL_EN
-	components new SerialAMSenderC(AM_NOTIFYPARENTMSG);
-	components new SerialAMReceiverC(AM_NOTIFYPARENTMSG);
-#endif
+	//components new AMSenderC(AM_NOTIFYPARENTMSG) as NotifySenderC;
+	//components new AMReceiverC(AM_NOTIFYPARENTMSG) as NotifyReceiverC;
+
+	components new AMSenderC(AM_AGGREGATEMSG) as AggSenderC;
+	components new AMReceiverC(AM_AGGREGATEMSG) as AggReceiverC;
+
+	// Εδώ έχουμε τις ουρές για κάθε είδος μηνλυματος, μια ουρά για αποστολή και μια για παραλαβή
 	components new PacketQueueC(SENDER_QUEUE_SIZE) as RoutingSendQueueC;
 	components new PacketQueueC(RECEIVER_QUEUE_SIZE) as RoutingReceiveQueueC;
-	components new PacketQueueC(SENDER_QUEUE_SIZE) as NotifySendQueueC;
-	components new PacketQueueC(RECEIVER_QUEUE_SIZE) as NotifyReceiveQueueC;
+	//components new PacketQueueC(SENDER_QUEUE_SIZE) as NotifySendQueueC;
+	//components new PacketQueueC(RECEIVER_QUEUE_SIZE) as NotifyReceiveQueueC;
+
+	components new PacketQueueC(SENDER_QUEUE_SIZE) as AggSendQueueC;
+	components new PacketQueueC(RECEIVER_QUEUE_SIZE) as AggReceiveQueueC;
 	
-	components MainC, ActiveMessageC, SerialActiveMessageC, LedsC;
+	components MainC, ActiveMessageC, SerialActiveMessageC, LedC, RandomC;
+
+	// Εδώ έχουμε κάποιους μετρητές
 	components new TimerMilliC() as Led0TimerC;
 	components new TimerMilliC() as Led1TimerC;
 	components new TimerMilliC() as Led2TimerC;
 	components new TimerMilliC() as RoutingMsgTimerC;
 	components new TimerMilliC() as LostTaskTimerC;
 	
+	// Εδώ δηλώνουμε τα 'interfaces' που θα χρησιμοποιήσουμε. Όλα αυτά τα 'interfaces' είναι δηλωμένα στο άλλο αρχείο και εδώ κάνουμε το wiring.
+	// Όλα τα ονόματα που βλέπουμε μετά την τελίτσα είνα τα ονόματα που έχουμε ορίσει στο 'SRTreee.c'. Οπότε ότι καινούργιο 'interface' προσθέσουμε στο 'SRTreee.c', πρέπει να το συνδέσουμε εδώ για να βρίσεκι τον κώδικά του.
 	SRTreeC.Boot->MainC.Boot;
 	
 	SRTreeC.RadioControl -> ActiveMessageC;
@@ -44,8 +46,15 @@ implementation{
 	
 	SRTreeC.RoutingPacket->RoutingSenderC.Packet;
 	SRTreeC.RoutingAMPacket->RoutingSenderC.AMPacket;
+
+	SRTreeC.AggPacket->AggSenderC.Packet;
+	SRTreeC.AggAMPacket->AggSenderC.AMPacket;	
+
 	SRTreeC.RoutingAMSend->RoutingSenderC.AMSend;
 	SRTreeC.RoutingReceive->RoutingReceiverC.Receive;
+
+	SRTreeC.AggAMSend->AggSenderC.AMSend;
+	SRTreeC.AggReceive->AggReceiveC.Receive;
 	
 	SRTreeC.NotifyPacket->NotifySenderC.Packet;
 	SRTreeC.NotifyAMPacket->NotifySenderC.AMPacket;
@@ -63,5 +72,10 @@ implementation{
 	SRTreeC.RoutingReceiveQueue->RoutingReceiveQueueC;
 	SRTreeC.NotifySendQueue->NotifySendQueueC;
 	SRTreeC.NotifyReceiveQueue->NotifyReceiveQueueC;
+
+	SRTreeC.AggSendQueue->AggSendQueueC;
+	SRTreeC.AggReceiveQueue->AggReceiveQueueC;
+
+	SRTreeC.Random->RandomC;
 	
 }

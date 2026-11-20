@@ -3,8 +3,15 @@
 	#include "printf.h"
 #endif
 
+// Αυτό είναι ο κώδικας που θα τρέχει ο κάθε αισθητήρας μόνος του.
+
+// Ότι 'interface' προσθέσουμε εδώ, θα πρέπει αν το συνδέσουμε και στο 'SRTreeAppC.nc'
+
 module SRTreeC
 {
+	// Εδώ αναφέρουμε όλα τα 'interfaces' που έχουμε
+	// Να πετάξουμε όσα 'interfaces' δεν χρειάζονται (πχ. Leds)
+
 	uses interface Boot;
 	uses interface Leds;
 	uses interface SplitControl as RadioControl;
@@ -15,6 +22,11 @@ module SRTreeC
 	uses interface Packet as RoutingPacket;
 	uses interface AMSend as RoutingAMSend;
 	uses interface AMPacket as RoutingAMPacket;
+
+	// Νέα interfaces για τα δεδομένα συνάθροισης
+	uses interface Packet as AggPacket;
+	uses interface AMSend as AggAMSend;
+	uses interface AMPacket as AggAMPacket;
 	
 	uses interface AMSend as NotifyAMSend;
 	uses interface AMPacket as NotifyAMPacket;
@@ -40,10 +52,18 @@ module SRTreeC
 	
 	uses interface PacketQueue as NotifySendQueue;
 	uses interface PacketQueue as NotifyReceiveQueue;
+
+	// Νέες ουρές για τα δεδομένα συνάθροισης
+	uses interface PacketQueue as AggSendQueue;
+	uses interface PacketQueue as AggReceiveQueue;
+
+	uses interface Random; // Για παραγωγή τυχαίων αριθμών
 }
 implementation
 {
-	uint16_t  roundCounter;
+	// Εδώ ξεκινάει ο κώδικας
+
+	uint16_t  roundCounter; // Ορίζει σε ποιά εποχή είμαστε
 	
 	message_t radioRoutingSendPkt;
 	message_t radioNotifySendPkt;
@@ -52,6 +72,7 @@ implementation
 	message_t serialPkt;
 	//message_t serialRecPkt;
 	
+	// Αν είναι busy ο ασύρματος
 	bool RoutingSendBusy=FALSE;
 	bool NotifySendBusy=FALSE;
 
@@ -64,9 +85,11 @@ implementation
 	bool lostRoutingRecTask=FALSE;
 	bool lostNotifyRecTask=FALSE;
 	
-	uint8_t curdepth;
-	uint16_t parentID;
+	// Αρχικοποιούνατι σε τιμές που λένε 'δε ξέρω το βάθος μου' και 'δεν ξέρω τον πατέρα μου' και έπειτα τα αλλάξουν
+	uint8_t curdepth; // Το τρέχον βάθος
+	uint16_t parentID; // Ποιός είναι ο πατέρας μου
 	
+	// Αυτά είναι 'tasks' που ορίζω παρακάτω
 	task void sendRoutingTask();
 	task void sendNotifyTask();
 	task void receiveRoutingTask();
@@ -204,7 +227,7 @@ implementation
 		}
 	}
 	
-	event void RadioControl.startDone(error_t err)
+	event void RadioControl.startDone(error_t err) // To 'boot' του αισθητήρα ολοκληρώθηκε (ήρθε το event)
 	{
 		if (err == SUCCESS)
 		{
@@ -217,6 +240,8 @@ implementation
 			//call RoutingMsgTimer.startOneShot(TIMER_PERIOD_MILLI);
 			//call RoutingMsgTimer.startPeriodic(TIMER_PERIOD_MILLI);
 			//call LostTaskTimer.startPeriodic(SEND_CHECK_MILLIS);
+
+			// Αν είσαι ο κόμβος 0, περίμενε λίγη ώρα να κάνουν 'boot' και οι υπόλοιποι αισθητήρες
 			if (TOS_NODE_ID==0)
 			{
 				call RoutingMsgTimer.startOneShot(TIMER_FAST_PERIOD);
@@ -310,6 +335,9 @@ implementation
 		printf("RoutingMsgTimer fired!  radioBusy = %s \n",(RoutingSendBusy)?"True":"False");
 		printfflush();
 #endif
+
+		// Αν είσαι ο κόμβος 0, αύξηση την εποχή σου κατά 1 και ξεκιάει ένας άλλος μετρητής που θα βαρέσει μετά από 'TIMER_PERIOD_MILLI'
+		// TODO: Στο tag, το routing στέλνεται ΜΟΝΟ μια φορά. Εδώ στέλνεται σε κάθε εποχή, οπότε θέλει άλλαγμα
 		if (TOS_NODE_ID==0)
 		{
 			roundCounter+=1;
@@ -322,6 +350,7 @@ implementation
 		}
 		
 		if(call RoutingSendQueue.full())
+		// Εδώ θα πρέπει να στειλώ τα routing μηνύματα
 		{
 #ifdef PRINTFDBG_MODE
 			printf("RoutingSendQueue is FULL!!! \n");
@@ -341,9 +370,11 @@ implementation
 #endif
 			return;
 		}
+		// Εδώ γεμίζουμε τα περιεχόμενα του μηνύματος
 		atomic{
-		mrpkt->senderID=TOS_NODE_ID;
-		mrpkt->depth = curdepth;
+		// TODO: Το να λέω μέσα στο μληνυμα το ποιός είμαι εγώ που το στέλνω είναι άσκοπο, αφού από το 'interface' AMPacket, είπαμε ότι αυτό αναφέρεται στην κεφαλή του πακέτου
+		mrpkt->senderID=TOS_NODE_ID; // Το ID του τρέχοντος κόμβου
+		mrpkt->depth = curdepth; // Το βάθος του τρέχοντος κόμβου
 		}
 		dbg("SRTreeC" , "Sending RoutingMsg... \n");
 
@@ -351,13 +382,17 @@ implementation
 		printf("NodeID= %d : RoutingMsg sending...!!!! \n", TOS_NODE_ID);
 		printfflush();
 #endif		
+
+		// Στην κεφαλή του μηνύματος βάζουμε και τον αποδέκτη (που εδώ είναι broadcast) και το μέγεθος του μηνύματος
 		call RoutingAMPacket.setDestination(&tmp, AM_BROADCAST_ADDR);
 		call RoutingPacket.setPayloadLength(&tmp, sizeof(RoutingMsg));
 		
-		enqueueDone=call RoutingSendQueue.enqueue(tmp);
+		enqueueDone=call RoutingSendQueue.enqueue(tmp); // Το βάζουμε στην ουρά των μηνυμάτων
 		
-		if( enqueueDone==SUCCESS)
+		if( enqueueDone==SUCCESS) // Αν η ουρά δεν είναι γεμάτη
 		{
+			// Αν είναι το 1ο μήνυμα στην ουρά, κάνε 'sendRoutingTask'
+			// NOTE: Αυτό το κάνουμε μόνο στο 1ο, διότι αν είχαμε 2, το 1ο θα έκανε το 'sendRoutingTask' και θα έστελνε και το 2ο αυτόματα.
 			if (call RoutingSendQueue.size()==1)
 			{
 				dbg("SRTreeC", "SendTask() posted!!\n");
@@ -396,7 +431,8 @@ implementation
 	{
 		call Leds.led2Off();
 	}
-	
+
+	// Εδώ είναι το event για όταν στέλνουμε ένα μήνυμα
 	event void RoutingAMSend.sendDone(message_t * msg , error_t err)
 	{
 		dbg("SRTreeC", "A Routing package sent... %s \n",(err==SUCCESS)?"True":"False");
@@ -412,6 +448,7 @@ implementation
 #endif
 		setRoutingSendBusy(FALSE);
 		
+		// Αν η ουρά μηνυμάτων δεν είναι άδεια, στείλε και το επόμενο μήνυμα
 		if(!(call RoutingSendQueue.empty()))
 		{
 			post sendRoutingTask();
@@ -517,6 +554,8 @@ implementation
 		return msg;
 	}
 //	event message_t* Receive.receive(message_t* msg, void* payload, uint8_t len)
+
+	// Όταν λαμβάνουμε ένα μήνυμα, εκτελείται αυτό το event
 	event message_t* RoutingReceive.receive( message_t * msg , void * payload, uint8_t len)
 	{
 		error_t enqueueDone;
@@ -621,12 +660,12 @@ implementation
 			return;
 		}
 		
-		radioRoutingSendPkt = call RoutingSendQueue.dequeue();
+		radioRoutingSendPkt = call RoutingSendQueue.dequeue(); // Αφαιρούμε το 1ο μήνυμα από την ουρά
 		
 		//call Leds.led2On();
 		//call Led2Timer.startOneShot(TIMER_LEDS_MILLI);
-		mlen= call RoutingPacket.payloadLength(&radioRoutingSendPkt);
-		mdest=call RoutingAMPacket.destination(&radioRoutingSendPkt);
+		mlen= call RoutingPacket.payloadLength(&radioRoutingSendPkt); // Παίρνουμε το μέγεθος του μηνύματος
+		mdest=call RoutingAMPacket.destination(&radioRoutingSendPkt); // Παίρνουμε τον αποδέκτη του μηνύματος
 		if(mlen!=sizeof(RoutingMsg))
 		{
 			dbg("SRTreeC","\t\tsendRoutingTask(): Unknown message!!!\n");
@@ -636,6 +675,9 @@ implementation
 #endif
 			return;
 		}
+
+		// Καλούμε την 'send' για στείλουμε το μήνυμα
+		// NOTE: Όταν το μήνυμα σταλεί, θα μου έρθει ένα event. Αυτό δε σημαίνει ότι ο παραλήπτης το έλαβε.
 		sendDone=call RoutingAMSend.send(mdest,&radioRoutingSendPkt,mlen);
 		
 		if ( sendDone== SUCCESS)
@@ -756,7 +798,7 @@ implementation
 		printf("ReceiveRoutingTask():received msg...\n");
 		printfflush();
 #endif
-		radioRoutingRecPkt= call RoutingReceiveQueue.dequeue();
+		radioRoutingRecPkt= call RoutingReceiveQueue.dequeue(); // Βγάζει ένα μήνυμα από την ουρά
 		
 		len= call RoutingPacket.payloadLength(&radioRoutingRecPkt);
 		
@@ -769,10 +811,10 @@ implementation
 		
 		// pos tha xexorizo ta 2 diaforetika minimata???
 				
-		if(len == sizeof(RoutingMsg))
+		if(len == sizeof(RoutingMsg)) // Σίγουρα θα έχει αυτό το μέγεθος
 		{
 			NotifyParentMsg* m;
-			RoutingMsg * mpkt = (RoutingMsg*) (call RoutingPacket.getPayload(&radioRoutingRecPkt,len));
+			RoutingMsg * mpkt = (RoutingMsg*) (call RoutingPacket.getPayload(&radioRoutingRecPkt,len)); // Παίρνει ένα δείκτη στα δεδομένα του μηνύματος
 			
 			//if(TOS_NODE_ID >0)
 			//{
@@ -789,13 +831,16 @@ implementation
 			if ( (parentID<0)||(parentID>=65535))
 			{
 				// tote den exei akoma patera
-				parentID= call RoutingAMPacket.source(&radioRoutingRecPkt);//mpkt->senderID;q
-				curdepth= mpkt->depth + 1;
+				//NOTE: Ο έξυπνιος τρόπος να βρούμε ποιός είναια υτός που έστειλε το μήνυμα είναι η source (αντί για mpkt->senderID)
+				parentID= call RoutingAMPacket.source(&radioRoutingRecPkt);//mpkt->senderID;
+				curdepth= mpkt->depth + 1; // Το τρέχον βάθος είναι +1 αυτού που μου έστειλε το μήνυμα
+
+				// TODO: Στο TAG οι κόμβοι χρονοπρογραμματίζονται σύμφωνα με το βάθος τους. Οπότε εδώ που βρίσκουμε το βάθος, μπορούμε να ξεκινάμε έναν timer που θα λέει το πότε λειτουργεί ο κόμβος (συγκεκριμένα θα κάνουμε και χρήση του startPeriodical, ώστε να χτυπάει σε συγκεκριμένη περίοδο)
 #ifdef PRINTFDBG_MODE
 				printf("NodeID= %d : curdepth= %d , parentID= %d \n", TOS_NODE_ID ,curdepth , parentID);
 				printfflush();
 #endif
-				// tha stelnei kai ena minima NotifyParentMsg ston patera
+				// TODO: Εδώ στένουμε ένα μήνυμα 'NotifyParentMsg', για να του πούμε ότι τον διαλέξαμε για πατέρα και ποιό είναι το βάθος μου. ΟΜΩΣ, στο TAG αυτό δεν το κάνουμε. Ένας κόμβος Α καταλαβαίνει ότι είναι πατέρας του Β, όταν λάβει δεδομένα του Β για το query (αφού τα παιδιά στέλνουν δεδομένα για το query μόνο στον πατέρα)
 				
 				m = (NotifyParentMsg *) (call NotifyPacket.getPayload(&tmp, sizeof(NotifyParentMsg)));
 				m->senderID=TOS_NODE_ID;
@@ -808,6 +853,8 @@ implementation
 #endif
 				call NotifyAMPacket.setDestination(&tmp, parentID);
 				call NotifyPacket.setPayloadLength(&tmp,sizeof(NotifyParentMsg));
+
+				// TODO: Κάποιος που έλαβε ένα 'routing message' για πρώτη φορά (και αποφάσισα ποιός είναι ο πατερας μου και έκανα τον χρονοπρογραμματισμό μου), πρέπει να στείλω αυτό το 'routing message' για να το ακούσουν και οι γειτονές μου
 				
 				if (call NotifySendQueue.enqueue(tmp)==SUCCESS)
 				{
@@ -821,6 +868,8 @@ implementation
 						post sendNotifyTask();
 					}
 				}
+
+				// Αν δεν είμαι ο κόμβος 0, ξεκίνα έναν μετρητή για να στείλεις το 'routing message'
 				if (TOS_NODE_ID!=0)
 				{
 					call RoutingMsgTimer.startOneShot(TIMER_FAST_PERIOD);
