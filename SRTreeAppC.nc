@@ -32,6 +32,10 @@ implementation{
 	components new TimerMilliC() as RoutingMsgTimerC;
 	// [Βήμα 4] ΠΡΟΣΘΗΚΗ: Ο μετρητής της εποχής (χρονοπρογραμματισμός TAG βάσει βάθους).
 	components new TimerMilliC() as EpochTimerC;
+	// [Βήμα 7] ΠΡΟΣΘΗΚΗ: Ο μετρητής της τυχαίας καθυστέρησης αποστολής προς τον πατέρα.
+	components new TimerMilliC() as AggSendTimerC;
+	// [Βήμα 11] ΠΡΟΣΘΗΚΗ: Ο μετρητής για την επαναποστολή ενός μηνύματος συνάθροισης που δεν επιβεβαιώθηκε.
+	components new TimerMilliC() as AggRetryTimerC;
 	// [Βήμα 1] ΑΦΑΙΡΕΣΗ: 'components new TimerMilliC() as LostTaskTimerC;' (ο LostTaskTimer δεν ξεκινούσε ποτέ, νεκρός κώδικας).
 
 	// Εδώ δηλώνουμε τα 'interfaces' που θα χρησιμοποιήσουμε. Όλα αυτά τα 'interfaces' είναι δηλωμένα στο άλλο αρχείο και εδώ κάνουμε το wiring.
@@ -46,6 +50,8 @@ implementation{
 	SRTreeC.Led2Timer-> Led2TimerC;
 	SRTreeC.RoutingMsgTimer->RoutingMsgTimerC;
 	SRTreeC.EpochTimer->EpochTimerC; // [Βήμα 4] ΠΡΟΣΘΗΚΗ
+	SRTreeC.AggSendTimer->AggSendTimerC; // [Βήμα 7] ΠΡΟΣΘΗΚΗ
+	SRTreeC.AggRetryTimer->AggRetryTimerC; // [Βήμα 11] ΠΡΟΣΘΗΚΗ
 	// [Βήμα 1] ΑΦΑΙΡΕΣΗ: 'SRTreeC.LostTaskTimer->LostTaskTimerC;'
 
 	SRTreeC.RoutingPacket->RoutingSenderC.Packet;
@@ -58,6 +64,7 @@ implementation{
 	SRTreeC.RoutingReceive->RoutingReceiverC.Receive;
 
 	SRTreeC.AggAMSend->AggSenderC.AMSend;
+	SRTreeC.AggAcks->AggSenderC.Acks; // [Βήμα 11] ΠΡΟΣΘΗΚΗ: επιβεβαιώσεις λήψης (ACK) για τα μηνύματα συνάθροισης
 	// [Βήμα 1] ΑΛΛΑΓΗ: Ήταν '->AggReceiveC.Receive'. Ορθογραφικό λάθος: το component λέγεται 'AggReceiverC'.
 	SRTreeC.AggReceive->AggReceiverC.Receive;
 
