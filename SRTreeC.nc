@@ -15,7 +15,7 @@ module SRTreeC
 	uses interface Boot;
 	uses interface Leds;
 	uses interface SplitControl as RadioControl;
-	// [Βήμα 1] ΑΦΑΙΡΕΣΗ: 'uses interface SplitControl as SerialControl;' (μέσα σε #ifdef SERIAL_EN).
+	// ΑΦΑΙΡΕΣΗ: 'uses interface SplitControl as SerialControl;' (μέσα σε #ifdef SERIAL_EN).
 	// Η σειριακή θύρα χρησιμοποιούνταν μόνο για να στέλνει η ρίζα τα NotifyParentMsg στο PC (πραγματικό hardware).
 
 	uses interface Packet as RoutingPacket;
@@ -26,44 +26,44 @@ module SRTreeC
 	uses interface Packet as AggPacket;
 	uses interface AMSend as AggAMSend;
 	uses interface AMPacket as AggAMPacket;
-	// [Βήμα 11] ΠΡΟΣΘΗΚΗ: Επιβεβαιώσεις λήψης (ACK) του επιπέδου ζεύξης για τα μηνύματα συνάθροισης.
+	// ΠΡΟΣΘΗΚΗ: Επιβεβαιώσεις λήψης (ACK) του επιπέδου ζεύξης για τα μηνύματα συνάθροισης.
 	uses interface PacketAcknowledgements as AggAcks;
 	
-	// [Βήμα 1] ΑΦΑΙΡΕΣΗ: Τα interfaces NotifyAMSend, NotifyAMPacket, NotifyPacket.
+	// ΑΦΑΙΡΕΣΗ: Τα interfaces NotifyAMSend, NotifyAMPacket, NotifyPacket.
 	// Στο TAG δεν στέλνουμε NotifyParentMsg: ο πατέρας καταλαβαίνει τα παιδιά του όταν λάβει δεδομένα τους.
 
-	// [Βήμα 1] ΑΦΑΙΡΕΣΗ: Τα interfaces SerialAMSend, SerialAMPacket, SerialPacket (μέσα σε #ifdef SERIAL_EN).
+	// ΑΦΑΙΡΕΣΗ: Τα interfaces SerialAMSend, SerialAMPacket, SerialPacket (μέσα σε #ifdef SERIAL_EN).
 	uses interface Timer<TMilli> as Led0Timer;
 	uses interface Timer<TMilli> as Led1Timer;
 	uses interface Timer<TMilli> as Led2Timer;
 	uses interface Timer<TMilli> as RoutingMsgTimer;
-	// [Βήμα 4] ΠΡΟΣΘΗΚΗ: Ο περιοδικός μετρητής της εποχής. Χτυπάει μία φορά ανά εποχή, τη στιγμή που ο κόμβος
+	// ΠΡΟΣΘΗΚΗ: Ο περιοδικός μετρητής της εποχής. Χτυπάει μία φορά ανά εποχή, τη στιγμή που ο κόμβος
 	// πρέπει να λειτουργήσει (ανάλογα με το βάθος του).
 	uses interface Timer<TMilli> as EpochTimer;
-	// [Βήμα 7] ΠΡΟΣΘΗΚΗ: Μετρητής μιας χρήσης για την τυχαία καθυστέρηση της αποστολής προς τον πατέρα, μέσα στο slot του κόμβου.
+	// ΠΡΟΣΘΗΚΗ: Μετρητής μιας χρήσης για την τυχαία καθυστέρηση της αποστολής προς τον πατέρα, μέσα στο slot του κόμβου.
 	uses interface Timer<TMilli> as AggSendTimer;
-	// [Βήμα 11] ΠΡΟΣΘΗΚΗ: Μετρητής για την επαναποστολή ενός μηνύματος συνάθροισης που δεν επιβεβαιώθηκε.
+	// ΠΡΟΣΘΗΚΗ: Μετρητής για την επαναποστολή ενός μηνύματος συνάθροισης που δεν επιβεβαιώθηκε.
 	uses interface Timer<TMilli> as AggRetryTimer;
-	// [Βήμα 1] ΑΦΑΙΡΕΣΗ: 'uses interface Timer<TMilli> as LostTaskTimer;'
+	// ΑΦΑΙΡΕΣΗ: 'uses interface Timer<TMilli> as LostTaskTimer;'
 	// Η μόνη εντολή που τον ξεκινούσε ήταν σε σχόλιο, άρα δεν χτυπούσε ποτέ (νεκρός κώδικας).
 	
 	uses interface Receive as RoutingReceive;
-	// [Βήμα 1] ΠΡΟΣΘΗΚΗ: Λήψη των δεδομένων συνάθροισης από τα παιδιά. Ήταν ήδη συνδεδεμένο στο SRTreeAppC.nc
+	// ΠΡΟΣΘΗΚΗ: Λήψη των δεδομένων συνάθροισης από τα παιδιά. Ήταν ήδη συνδεδεμένο στο SRTreeAppC.nc
 	// ('SRTreeC.AggReceive->...') αλλά δεν είχε δηλωθεί εδώ, οπότε δεν έκανε compile.
 	uses interface Receive as AggReceive;
-	// [Βήμα 1] ΑΦΑΙΡΕΣΗ: 'uses interface Receive as NotifyReceive;' και 'uses interface Receive as SerialReceive;'
+	// ΑΦΑΙΡΕΣΗ: 'uses interface Receive as NotifyReceive;' και 'uses interface Receive as SerialReceive;'
 	
 	uses interface PacketQueue as RoutingSendQueue;
 	uses interface PacketQueue as RoutingReceiveQueue;
 	
-	// [Βήμα 1] ΑΦΑΙΡΕΣΗ: Οι ουρές NotifySendQueue και NotifyReceiveQueue.
+	// ΑΦΑΙΡΕΣΗ: Οι ουρές NotifySendQueue και NotifyReceiveQueue.
 
 	// Νέες ουρές για τα δεδομένα συνάθροισης
 	uses interface PacketQueue as AggSendQueue;
 	uses interface PacketQueue as AggReceiveQueue;
 
 	uses interface Random; // Για παραγωγή τυχαίων αριθμών
-	// [Βήμα 3] ΠΡΟΣΘΗΚΗ: Αρχικοποίηση (seed) της γεννήτριας τυχαίων αριθμών. Χωρίς αυτό το RandomC ξεκινάει πάντα
+	// ΠΡΟΣΘΗΚΗ: Αρχικοποίηση (seed) της γεννήτριας τυχαίων αριθμών. Χωρίς αυτό το RandomC ξεκινάει πάντα
 	// από seed = TOS_NODE_ID+1, άρα η ρίζα θα διάλεγε ΠΑΝΤΑ το ίδιο ερώτημα και την ίδια εποχή (όπως στο lab4).
 	uses interface ParameterInit<uint16_t> as SeedInit;
 }
@@ -74,29 +74,29 @@ implementation
 	uint16_t  roundCounter; // Ορίζει σε ποιά εποχή είμαστε
 	
 	message_t radioRoutingSendPkt;
-	// [Βήμα 1] ΑΦΑΙΡΕΣΗ: 'message_t radioNotifySendPkt;' (NotifyParentMsg).
-	// [Βήμα 1] ΑΦΑΙΡΕΣΗ: 'message_t serialPkt;' και '//message_t serialRecPkt;' (σειριακή θύρα).
+	// ΑΦΑΙΡΕΣΗ: 'message_t radioNotifySendPkt;' (NotifyParentMsg).
+	// ΑΦΑΙΡΕΣΗ: 'message_t serialPkt;' και '//message_t serialRecPkt;' (σειριακή θύρα).
 	
 	// Αν είναι busy ο ασύρματος
 	bool RoutingSendBusy=FALSE;
-	// [Βήμα 1] ΑΦΑΙΡΕΣΗ: 'bool NotifySendBusy=FALSE;' και 'bool serialBusy=FALSE;'
+	// ΑΦΑΙΡΕΣΗ: 'bool NotifySendBusy=FALSE;' και 'bool serialBusy=FALSE;'
 	
-	// [Βήμα 1] ΑΦΑΙΡΕΣΗ: Οι σημαίες lostRoutingSendTask, lostNotifySendTask, lostRoutingRecTask, lostNotifyRecTask.
+	// ΑΦΑΙΡΕΣΗ: Οι σημαίες lostRoutingSendTask, lostNotifySendTask, lostRoutingRecTask, lostNotifyRecTask.
 	// Τις διάβαζε μόνο το LostTaskTimer.fired(), που δεν εκτελούνταν ποτέ.
 	
 	// Αρχικοποιούνατι σε τιμές που λένε 'δε ξέρω το βάθος μου' και 'δεν ξέρω τον πατέρα μου' και έπειτα τα αλλάξουν
 	uint8_t curdepth; // Το τρέχον βάθος
 	uint16_t parentID; // Ποιός είναι ο πατέρας μου
 
-	// [Βήμα 3] ΠΡΟΣΘΗΚΗ: Οι παράμετροι του ερωτήματος. Τις διαλέγει τυχαία η ρίζα και τις μαθαίνουν οι υπόλοιποι κόμβοι
+	// ΠΡΟΣΘΗΚΗ: Οι παράμετροι του ερωτήματος. Τις διαλέγει τυχαία η ρίζα και τις μαθαίνουν οι υπόλοιποι κόμβοι
 	// από το RoutingMsg, κατά το χτίσιμο του δέντρου.
 	uint8_t queryType; // 1=SUM, 2=AVG, 3=VARIANCE, 4=MAX
 	uint8_t epochSec; // Διάρκεια εποχής σε δευτερόλεπτα (30, 40, ..., 100)
 
-	// [Βήμα 6] ΠΡΟΣΘΗΚΗ: Η μέτρηση του κόμβου στην τρέχουσα εποχή.
+	// ΠΡΟΣΘΗΚΗ: Η μέτρηση του κόμβου στην τρέχουσα εποχή.
 	uint8_t measurement;
 
-	// [Βήμα 8] ΠΡΟΣΘΗΚΗ: Το μερικό αποτέλεσμα που έχουν στείλει τα παιδιά στην τρέχουσα εποχή (συνδυασμένο).
+	// ΠΡΟΣΘΗΚΗ: Το μερικό αποτέλεσμα που έχουν στείλει τα παιδιά στην τρέχουσα εποχή (συνδυασμένο).
 	// Ανάλογα με το ερώτημα χρησιμοποιούνται μόνο κάποια από αυτά: SUM -> childSum, AVG -> childSum/childCount,
 	// VARIANCE -> childSum/childSumSq/childCount, MAX -> childMax. Μηδενίζονται μετά από κάθε αποστολή (resetChildData()).
 	uint16_t childSum;
@@ -104,14 +104,14 @@ implementation
 	uint8_t childCount;
 	uint8_t childMax;
 
-	// [Βήμα 7] ΠΡΟΣΘΗΚΗ: Αποστολή των δεδομένων συνάθροισης (ίδια λογική με τα routing μηνύματα: ουρά + task + busy).
+	// ΠΡΟΣΘΗΚΗ: Αποστολή των δεδομένων συνάθροισης (ίδια λογική με τα routing μηνύματα: ουρά + task + busy).
 	message_t radioAggSendPkt;
 	bool AggSendBusy=FALSE;
 	// TRUE από τη στιγμή που χτυπάει ο EpochTimer μέχρι να φύγει το μήνυμα προς τον πατέρα (στη διάρκεια της τυχαίας
 	// καθυστέρησης). Τότε δεχόμαστε ακόμα δεδομένα από τα παιδιά για την τρέχουσα εποχή.
 	bool aggPending=FALSE;
 
-	// [Βήμα 11] ΠΡΟΣΘΗΚΗ: Αξιοπιστία.
+	// ΠΡΟΣΘΗΚΗ: Αξιοπιστία.
 	uint8_t aggRetries; // Πόσες επαναποστολές έχουν γίνει για το τρέχον μήνυμα συνάθροισης
 	uint8_t routingRepeatsLeft; // Πόσες ακόμα φορές θα σταλεί το routing μήνυμα του κόμβου
 	// Τα παιδιά από τα οποία λάβαμε ήδη δεδομένα στην τρέχουσα εποχή. Αν χαθεί το ACK, το παιδί ξαναστέλνει το ίδιο
@@ -122,14 +122,14 @@ implementation
 	// Αυτά είναι 'tasks' που ορίζω παρακάτω
 	task void sendRoutingTask();
 	task void receiveRoutingTask();
-	task void sendAggTask(); // [Βήμα 7] ΠΡΟΣΘΗΚΗ
-	task void receiveAggTask(); // [Βήμα 8] ΠΡΟΣΘΗΚΗ
-	// [Βήμα 1] ΑΦΑΙΡΕΣΗ: Οι δηλώσεις των tasks sendNotifyTask() και receiveNotifyTask().
+	task void sendAggTask(); // ΠΡΟΣΘΗΚΗ
+	task void receiveAggTask(); // ΠΡΟΣΘΗΚΗ
+	// ΑΦΑΙΡΕΣΗ: Οι δηλώσεις των tasks sendNotifyTask() και receiveNotifyTask().
 	
-	// [Βήμα 1] ΑΦΑΙΡΕΣΗ: Οι συναρτήσεις setLostRoutingSendTask(), setLostNotifySendTask(), setLostNotifyRecTask(),
+	// ΑΦΑΙΡΕΣΗ: Οι συναρτήσεις setLostRoutingSendTask(), setLostNotifySendTask(), setLostNotifyRecTask(),
 	// setLostRoutingRecTask(). Άλλαζαν μόνο τις σημαίες lost* του νεκρού μηχανισμού 'lost task'.
 
-	// [Βήμα 4] ΠΡΟΣΘΗΚΗ: Ξεκινάει (ή ξαναξεκινάει) τον περιοδικό μετρητή της εποχής, ανάλογα με το βάθος του κόμβου.
+	// ΠΡΟΣΘΗΚΗ: Ξεκινάει (ή ξαναξεκινάει) τον περιοδικό μετρητή της εποχής, ανάλογα με το βάθος του κόμβου.
 	// Χρονοπρογραμματισμός του TAG: ένας κόμβος σε βάθος d χτυπάει d slots ΠΡΙΝ το τέλος κάθε εποχής:
 	//     1η φορά:   epochSec*1024 - curdepth*TIMER_SLOT_MILLI
 	//     μετά:      κάθε epochSec*1024
@@ -149,7 +149,7 @@ implementation
 			TOS_NODE_ID, curdepth, epochMilli - offset, epochMilli);
 	}
 
-	// [Βήμα 6] ΠΡΟΣΘΗΚΗ: Νέα μέτρηση σε κάθε εποχή. Στην 1η εποχή τυχαίος ακέραιος στο [1..100]. Στις επόμενες, τυχαίος
+	// ΠΡΟΣΘΗΚΗ: Νέα μέτρηση σε κάθε εποχή. Στην 1η εποχή τυχαίος ακέραιος στο [1..100]. Στις επόμενες, τυχαίος
 	// ακέραιος που απέχει το πολύ 25% από την προηγούμενη μέτρηση (low..high) και πάντα στο [1..100].
 	void takeMeasurement()
 	{
@@ -170,17 +170,17 @@ implementation
 			roundCounter, TOS_NODE_ID, curdepth, parentID, measurement);
 	}
 
-	// [Βήμα 8] ΠΡΟΣΘΗΚΗ: Μηδενίζει το μερικό αποτέλεσμα των παιδιών, για να ξεκινήσει η επόμενη εποχή από την αρχή.
+	// ΠΡΟΣΘΗΚΗ: Μηδενίζει το μερικό αποτέλεσμα των παιδιών, για να ξεκινήσει η επόμενη εποχή από την αρχή.
 	void resetChildData()
 	{
 		childSum = 0;
 		childSumSq = 0;
 		childCount = 0;
 		childMax = 0;
-		heardCount = 0; // [Βήμα 11] ΠΡΟΣΘΗΚΗ: καινούργια εποχή, κανένα παιδί δεν έχει στείλει ακόμα
+		heardCount = 0; // ΠΡΟΣΘΗΚΗ: καινούργια εποχή, κανένα παιδί δεν έχει στείλει ακόμα
 	}
 
-	// [Βήμα 7] ΠΡΟΣΘΗΚΗ: Το μέγεθος (σε bytes) του μηνύματος συνάθροισης για το τρέχον ερώτημα.
+	// ΠΡΟΣΘΗΚΗ: Το μέγεθος (σε bytes) του μηνύματος συνάθροισης για το τρέχον ερώτημα.
 	uint8_t aggMsgLength()
 	{
 		switch (queryType)
@@ -193,7 +193,7 @@ implementation
 		}
 	}
 
-	// [Βήμα 9] ΠΡΟΣΘΗΚΗ: Η ρίζα συνδυάζει τη δική της μέτρηση με τα δεδομένα των παιδιών της και τυπώνει το τελικό
+	// ΠΡΟΣΘΗΚΗ: Η ρίζα συνδυάζει τη δική της μέτρηση με τα δεδομένα των παιδιών της και τυπώνει το τελικό
 	// αποτέλεσμα της εποχής. AVG = sum/count και VARIANCE = sumSq/count - (sum/count)^2 υπολογίζονται μόνο εδώ.
 	void printResult()
 	{
@@ -238,24 +238,24 @@ implementation
 		}
 	}
 	
-	// [Βήμα 1] ΑΦΑΙΡΕΣΗ: Η setNotifySendBusy() (NotifyParentMsg) και η setSerialBusy() (σειριακή θύρα, μέσα σε #ifdef SERIAL_EN).
+	// ΑΦΑΙΡΕΣΗ: Η setNotifySendBusy() (NotifyParentMsg) και η setSerialBusy() (σειριακή θύρα, μέσα σε #ifdef SERIAL_EN).
 	event void Boot.booted()
 	{
 		/////// arxikopoiisi radio kai serial
 		call RadioControl.start();
 		
 		setRoutingSendBusy(FALSE);
-		// [Βήμα 1] ΑΦΑΙΡΕΣΗ: 'setNotifySendBusy(FALSE);' και 'setSerialBusy(FALSE);'
+		// ΑΦΑΙΡΕΣΗ: 'setNotifySendBusy(FALSE);' και 'setSerialBusy(FALSE);'
 		roundCounter =0;
-		resetChildData(); // [Βήμα 8] ΠΡΟΣΘΗΚΗ
+		resetChildData(); // ΠΡΟΣΘΗΚΗ
 
-		// [Βήμα 3] ΠΡΟΣΘΗΚΗ: Seed της γεννήτριας με τον χρόνο της προσομοίωσης τη στιγμή του boot (όπως στο lab4).
+		// ΠΡΟΣΘΗΚΗ: Seed της γεννήτριας με τον χρόνο της προσομοίωσης τη στιγμή του boot (όπως στο lab4).
 		// Ο χρόνος αυτός εξαρτάται από το bootAtTime() του mySimulation.py.
 		call SeedInit.init(sim_time() % 1024);
 		
 		if(TOS_NODE_ID==0)
 		{
-			// [Βήμα 1] ΑΦΑΙΡΕΣΗ: 'call SerialControl.start();' (η ρίζα δεν ανοίγει πλέον σειριακή θύρα).
+			// ΑΦΑΙΡΕΣΗ: 'call SerialControl.start();' (η ρίζα δεν ανοίγει πλέον σειριακή θύρα).
 			curdepth=0;
 			parentID=0;
 			dbg("Boot", "curdepth = %d  ,  parentID= %d \n", curdepth , parentID);
@@ -293,16 +293,16 @@ implementation
 			// Αν είσαι ο κόμβος 0, περίμενε λίγη ώρα να κάνουν 'boot' και οι υπόλοιποι αισθητήρες
 			if (TOS_NODE_ID==0)
 			{
-				// [Βήμα 3] ΠΡΟΣΘΗΚΗ: Η ρίζα διαλέγει τυχαία το ερώτημα και τη διάρκεια της εποχής, ΠΡΙΝ στείλει το
+				// ΠΡΟΣΘΗΚΗ: Η ρίζα διαλέγει τυχαία το ερώτημα και τη διάρκεια της εποχής, ΠΡΙΝ στείλει το
 				// πρώτο routing μήνυμα, ώστε να διαδοθούν μέσα σε αυτό σε όλο το δίκτυο (χωρίς επιπλέον μηνύματα).
 				queryType = (call Random.rand16() % 4) + 1; // 1..4
 				epochSec = ((call Random.rand16() % 8) + 3) * 10; // 3..10 επί 10 -> 30, 40, ..., 100 sec
 				dbg("SRTreeC", "ROOT: queryType= %u (1=SUM, 2=AVG, 3=VARIANCE, 4=MAX) , epochSec= %u \n", queryType, epochSec);
 
-				// [Βήμα 4] ΠΡΟΣΘΗΚΗ: Η ρίζα (βάθος 0) ξεκινάει τον μετρητή της εποχής: χτυπάει στο τέλος κάθε εποχής.
+				// ΠΡΟΣΘΗΚΗ: Η ρίζα (βάθος 0) ξεκινάει τον μετρητή της εποχής: χτυπάει στο τέλος κάθε εποχής.
 				startEpochTimer();
 
-				routingRepeatsLeft = ROUTING_REPEATS; // [Βήμα 11] ΠΡΟΣΘΗΚΗ
+				routingRepeatsLeft = ROUTING_REPEATS; // ΠΡΟΣΘΗΚΗ
 				call RoutingMsgTimer.startOneShot(TIMER_FAST_PERIOD);
 			}
 		}
@@ -325,9 +325,9 @@ implementation
 		printfflush();
 #endif
 	}
-	// [Βήμα 1] ΑΦΑΙΡΕΣΗ: Τα events SerialControl.startDone() και SerialControl.stopDone() (σειριακή θύρα).
+	// ΑΦΑΙΡΕΣΗ: Τα events SerialControl.startDone() και SerialControl.stopDone() (σειριακή θύρα).
 	
-	// [Βήμα 1] ΑΦΑΙΡΕΣΗ: Το event LostTaskTimer.fired(). Ξαναέκανε post τα tasks που είχαν 'χαθεί', αλλά ο LostTaskTimer
+	// ΑΦΑΙΡΕΣΗ: Το event LostTaskTimer.fired(). Ξαναέκανε post τα tasks που είχαν 'χαθεί', αλλά ο LostTaskTimer
 	// δεν ξεκινούσε ποτέ. Δεν χρειάζεται αντικατάσταση: αν η sendRoutingTask() βρει τον ασύρματο busy, το
 	// RoutingAMSend.sendDone() την ξανακάνει post μόλις τελειώσει η τρέχουσα αποστολή (αφού η ουρά δεν είναι άδεια).
 	
@@ -344,7 +344,7 @@ implementation
 		printfflush();
 #endif
 
-		// [Βήμα 1] ΑΦΑΙΡΕΣΗ (TODO: 'Στο tag, το routing στέλνεται ΜΟΝΟ μια φορά'): Εδώ υπήρχε το μπλοκ
+		// ΑΦΑΙΡΕΣΗ (TODO: 'Στο tag, το routing στέλνεται ΜΟΝΟ μια φορά'): Εδώ υπήρχε το μπλοκ
 		//   if (TOS_NODE_ID==0) { roundCounter+=1; <εκτύπωση ROUND>; call RoutingMsgTimer.startOneShot(TIMER_PERIOD_MILLI); }
 		// με το οποίο η ρίζα ξαναέστελνε routing μήνυμα (δηλαδή ξαναέχτιζε το δέντρο) κάθε TIMER_PERIOD_MILLI (~150 sec).
 		// Στο TAG η τοπολογία είναι στατική, οπότε το δέντρο χτίζεται ΜΙΑ φορά, στην αρχή.
@@ -373,12 +373,12 @@ implementation
 		}
 		// Εδώ γεμίζουμε τα περιεχόμενα του μηνύματος
 		atomic{
-		// [Βήμα 2] ΑΦΑΙΡΕΣΗ (TODO: 'Το να λέω μέσα στο μήνυμα το ποιός είμαι εγώ που το στέλνω είναι άσκοπο, αφού από το
+		// ΑΦΑΙΡΕΣΗ (TODO: 'Το να λέω μέσα στο μήνυμα το ποιός είμαι εγώ που το στέλνω είναι άσκοπο, αφού από το
 		// interface AMPacket, είπαμε ότι αυτό αναφέρεται στην κεφαλή του πακέτου'): 'mrpkt->senderID=TOS_NODE_ID;'
 		// Το ActiveMessage βάζει αυτόματα τη διεύθυνση του αποστολέα στην κεφαλή κάθε πακέτου, οπότε ο παραλήπτης
 		// τη βρίσκει με 'call RoutingAMPacket.source(msg)'. Γλιτώνουμε 2 bytes σε κάθε routing μήνυμα.
 		mrpkt->depth = curdepth; // Το βάθος του τρέχοντος κόμβου
-		// [Βήμα 3] ΠΡΟΣΘΗΚΗ: Μαζί με το βάθος στέλνουμε και τις παραμέτρους του ερωτήματος, ώστε να τις μάθουν οι γείτονες.
+		// ΠΡΟΣΘΗΚΗ: Μαζί με το βάθος στέλνουμε και τις παραμέτρους του ερωτήματος, ώστε να τις μάθουν οι γείτονες.
 		mrpkt->queryType = queryType;
 		mrpkt->epochSec = epochSec;
 		}
@@ -395,7 +395,7 @@ implementation
 		
 		enqueueDone=call RoutingSendQueue.enqueue(tmp); // Το βάζουμε στην ουρά των μηνυμάτων
 
-		// [Βήμα 11] ΠΡΟΣΘΗΚΗ: Το routing μήνυμα στέλνεται ROUTING_REPEATS φορές, με τυχαίο διάστημα μεταξύ τους.
+		// ΠΡΟΣΘΗΚΗ: Το routing μήνυμα στέλνεται ROUTING_REPEATS φορές, με τυχαίο διάστημα μεταξύ τους.
 		// Αφού το δέντρο χτίζεται μόνο μία φορά, αν χανόταν το μοναδικό routing μήνυμα ενός κόμβου (θόρυβος ή σύγκρουση),
 		// ένας γείτονας που μπορεί να το ακούσει μόνο από αυτόν δεν θα έμπαινε ποτέ στο δέντρο (το είδαμε στην προσομοίωση).
 		// Κόστος: ένα επιπλέον μήνυμα 3 bytes ανά κόμβο, μία φορά στην αρχή. Η επανάληψη αγνοείται από όσους έχουν ήδη πατέρα.
@@ -438,7 +438,7 @@ implementation
 		}		
 	}
 	
-	// [Βήμα 4] ΠΡΟΣΘΗΚΗ: Χτυπάει μία φορά σε κάθε εποχή, στο slot του κόμβου (βλ. startEpochTimer()).
+	// ΠΡΟΣΘΗΚΗ: Χτυπάει μία φορά σε κάθε εποχή, στο slot του κόμβου (βλ. startEpochTimer()).
 	// Μέχρι αυτή τη στιγμή τα παιδιά (ένα slot νωρίτερα) έχουν ήδη στείλει τα δεδομένα τους.
 	event void EpochTimer.fired()
 	{
@@ -450,22 +450,22 @@ implementation
 			dbg("SRTreeC", "#######   EPOCH   %u    ############## \n", roundCounter);
 			dbg("SRTreeC", "#####################################\n");
 		}
-		// [Βήμα 6] ΑΛΛΑΓΗ: Αφαιρέθηκε το sim_time_string() από την εκτύπωση (το dbg τυπώνει ήδη τον χρόνο).
+		// ΑΛΛΑΓΗ: Αφαιρέθηκε το sim_time_string() από την εκτύπωση (το dbg τυπώνει ήδη τον χρόνο).
 		dbg("SRTreeC", "NodeID= %d : EpochTimer fired, epoch= %u , depth= %u \n", TOS_NODE_ID, roundCounter, curdepth);
 
-		// [Βήμα 6] ΠΡΟΣΘΗΚΗ: Νέα μέτρηση της εποχής.
+		// ΠΡΟΣΘΗΚΗ: Νέα μέτρηση της εποχής.
 		takeMeasurement();
 
 		if (TOS_NODE_ID==0)
 		{
-			// [Βήμα 9] ΠΡΟΣΘΗΚΗ: Η ρίζα είναι η τελευταία που λειτουργεί στην εποχή (ακριβώς στο τέλος της):
+			// ΠΡΟΣΘΗΚΗ: Η ρίζα είναι η τελευταία που λειτουργεί στην εποχή (ακριβώς στο τέλος της):
 			// τυπώνει το τελικό αποτέλεσμα και ξεκινάει την επόμενη εποχή από την αρχή.
 			printResult();
 			resetChildData();
 		}
 		else
 		{
-			// [Βήμα 7] ΠΡΟΣΘΗΚΗ: Κάθε άλλος κόμβος στέλνει στον πατέρα του μετά από τυχαία καθυστέρηση στο [0, TIMER_SLOT_MILLI/2).
+			// ΠΡΟΣΘΗΚΗ: Κάθε άλλος κόμβος στέλνει στον πατέρα του μετά από τυχαία καθυστέρηση στο [0, TIMER_SLOT_MILLI/2).
 			// Έτσι τα αδέρφια (ίδιο βάθος, ίδιο slot) δεν στέλνουν ταυτόχρονα (λιγότερες συγκρούσεις), και το μήνυμα φτάνει
 			// τουλάχιστον μισό slot πριν λειτουργήσει ο πατέρας.
 			aggPending = TRUE;
@@ -473,7 +473,7 @@ implementation
 		}
 	}
 
-	// [Βήμα 7] ΠΡΟΣΘΗΚΗ: Φτιάχνει το μερικό αποτέλεσμα του υποδέντρου (δική μας μέτρηση + δεδομένα παιδιών) στη δομή
+	// ΠΡΟΣΘΗΚΗ: Φτιάχνει το μερικό αποτέλεσμα του υποδέντρου (δική μας μέτρηση + δεδομένα παιδιών) στη δομή
 	// του ερωτήματος και το βάζει στην ουρά αποστολής προς τον πατέρα (unicast).
 	event void AggSendTimer.fired()
 	{
@@ -584,15 +584,15 @@ implementation
 		
 	}
 	
-	// [Βήμα 1] ΑΦΑΙΡΕΣΗ: Τα events NotifyAMSend.sendDone() (NotifyParentMsg) και SerialAMSend.sendDone() (σειριακή θύρα).
+	// ΑΦΑΙΡΕΣΗ: Τα events NotifyAMSend.sendDone() (NotifyParentMsg) και SerialAMSend.sendDone() (σειριακή θύρα).
 	
-	// [Βήμα 1] ΠΡΟΣΘΗΚΗ: Event για το AggAMSend (το nesC απαιτεί να υλοποιούνται όλα τα events των interfaces).
-	// [Βήμα 7] ΥΛΟΠΟΙΗΣΗ: Η αποστολή τελείωσε: ο ασύρματος είναι ξανά ελεύθερος και, αν υπάρχει κι άλλο μήνυμα στην ουρά, το στέλνουμε.
+	// ΠΡΟΣΘΗΚΗ: Event για το AggAMSend (το nesC απαιτεί να υλοποιούνται όλα τα events των interfaces).
+	// ΥΛΟΠΟΙΗΣΗ: Η αποστολή τελείωσε: ο ασύρματος είναι ξανά ελεύθερος και, αν υπάρχει κι άλλο μήνυμα στην ουρά, το στέλνουμε.
 	event void AggAMSend.sendDone(message_t * msg , error_t err)
 	{
 		dbg("SRTreeC", "An Agg package sent... %s , acked= %u \n", (err==SUCCESS)?"True":"False", call AggAcks.wasAcked(msg));
 
-		// [Βήμα 11] ΠΡΟΣΘΗΚΗ: Αν ο πατέρας δεν επιβεβαίωσε τη λήψη (π.χ. σύγκρουση με αδερφό που δεν μας ακούει), ξαναστέλνουμε
+		// ΠΡΟΣΘΗΚΗ: Αν ο πατέρας δεν επιβεβαίωσε τη λήψη (π.χ. σύγκρουση με αδερφό που δεν μας ακούει), ξαναστέλνουμε
 		// το ίδιο μήνυμα μετά από μια μικρή τυχαία καθυστέρηση, το πολύ AGG_MAX_RETRIES φορές. Ο ασύρματος μένει 'busy'.
 		if ((err != SUCCESS || !(call AggAcks.wasAcked(msg))) && aggRetries < AGG_MAX_RETRIES)
 		{
@@ -613,7 +613,7 @@ implementation
 		}
 	}
 	
-	// [Βήμα 11] ΠΡΟΣΘΗΚΗ: Επαναποστολή του μηνύματος συνάθροισης που δεν επιβεβαιώθηκε (είναι ακόμα στο radioAggSendPkt).
+	// ΠΡΟΣΘΗΚΗ: Επαναποστολή του μηνύματος συνάθροισης που δεν επιβεβαιώθηκε (είναι ακόμα στο radioAggSendPkt).
 	event void AggRetryTimer.fired()
 	{
 		uint8_t mlen = call AggPacket.payloadLength(&radioAggSendPkt);
@@ -635,8 +635,8 @@ implementation
 		}
 	}
 
-	// [Βήμα 1] ΠΡΟΣΘΗΚΗ: Event για το AggReceive.
-	// [Βήμα 8] ΥΛΟΠΟΙΗΣΗ: Λήψη δεδομένων συνάθροισης από ένα παιδί. Τα μηνύματα είναι unicast, οπότε φτάνουν εδώ μόνο όσα
+	// ΠΡΟΣΘΗΚΗ: Event για το AggReceive.
+	// ΥΛΟΠΟΙΗΣΗ: Λήψη δεδομένων συνάθροισης από ένα παιδί. Τα μηνύματα είναι unicast, οπότε φτάνουν εδώ μόνο όσα
 	// έχουν προορισμό εμάς, δηλαδή μόνο από τα παιδιά μας. Όπως και στο routing, αντιγράφουμε το μήνυμα στην ουρά λήψης
 	// και η επεξεργασία γίνεται στο receiveAggTask().
 	event message_t* AggReceive.receive( message_t * msg , void * payload, uint8_t len)
@@ -668,7 +668,7 @@ implementation
 		return msg;
 	}
 	
-	// [Βήμα 1] ΑΦΑΙΡΕΣΗ: Το event NotifyReceive.receive() (λήψη NotifyParentMsg).
+	// ΑΦΑΙΡΕΣΗ: Το event NotifyReceive.receive() (λήψη NotifyParentMsg).
 //	event message_t* Receive.receive(message_t* msg, void* payload, uint8_t len)
 
 	// Όταν λαμβάνουμε ένα μήνυμα, εκτελείται αυτό το event
@@ -681,12 +681,12 @@ implementation
 		msource =call RoutingAMPacket.source(msg);
 		
 		dbg("SRTreeC", "### RoutingReceive.receive() start ##### \n");
-		// [Βήμα 2] ΑΛΛΑΓΗ: Ήταν '... from %u  %u \n",((RoutingMsg*) payload)->senderID , msource);'. Το senderID δεν υπάρχει πια,
+		// ΑΛΛΑΓΗ: Ήταν '... from %u  %u \n",((RoutingMsg*) payload)->senderID , msource);'. Το senderID δεν υπάρχει πια,
 		// τυπώνουμε μόνο το msource (ο αποστολέας από την κεφαλή του πακέτου).
 		dbg("SRTreeC", "Something received!!!  from %u \n", msource);
 		//dbg("SRTreeC", "Something received!!!\n");
 #ifdef PRINTFDBG_MODE		
-		// [Βήμα 1] ΑΛΛΑΓΗ: Αφαιρέθηκε το 'npm=%u' / 'sizeof(NotifyParentMsg)', γιατί ο τύπος NotifyParentMsg δεν υπάρχει πια.
+		// ΑΛΛΑΓΗ: Αφαιρέθηκε το 'npm=%u' / 'sizeof(NotifyParentMsg)', γιατί ο τύπος NotifyParentMsg δεν υπάρχει πια.
 		printf("Something Received!!!, len = %u , rm=%u\n",len, sizeof(RoutingMsg));
 		printfflush();
 #endif
@@ -731,7 +731,7 @@ implementation
 		return msg;
 	}
 	
-	// [Βήμα 1] ΑΦΑΙΡΕΣΗ: Το event SerialReceive.receive() (σειριακή θύρα).
+	// ΑΦΑΙΡΕΣΗ: Το event SerialReceive.receive() (σειριακή θύρα).
 	
 	////////////// Tasks implementations //////////////////////////////
 	
@@ -766,7 +766,7 @@ implementation
 			printf(	"sendRoutingTask(): RoutingSendBusy= TRUE!!!\n");
 			printfflush();
 #endif
-			// [Βήμα 1] ΑΦΑΙΡΕΣΗ: 'setLostRoutingSendTask(TRUE);' (νεκρός μηχανισμός 'lost task').
+			// ΑΦΑΙΡΕΣΗ: 'setLostRoutingSendTask(TRUE);' (νεκρός μηχανισμός 'lost task').
 			// Δεν χάνεται τίποτα: το RoutingAMSend.sendDone() θα ξανακάνει post το task, αφού η ουρά δεν είναι άδεια.
 			return;
 		}
@@ -809,7 +809,7 @@ implementation
 			//setRoutingSendBusy(FALSE);
 		}
 	}
-	// [Βήμα 1] ΑΦΑΙΡΕΣΗ: Το task sendNotifyTask() (αποστολή NotifyParentMsg).
+	// ΑΦΑΙΡΕΣΗ: Το task sendNotifyTask() (αποστολή NotifyParentMsg).
 	////////////////////////////////////////////////////////////////////
 	//*****************************************************************/
 	///////////////////////////////////////////////////////////////////
@@ -819,7 +819,7 @@ implementation
 	
 	task void receiveRoutingTask()
 	{
-		// [Βήμα 1] ΑΦΑΙΡΕΣΗ: 'message_t tmp;' (το χρησιμοποιούσαν μόνο τα NotifyParentMsg που αφαιρέθηκαν).
+		// ΑΦΑΙΡΕΣΗ: 'message_t tmp;' (το χρησιμοποιούσαν μόνο τα NotifyParentMsg που αφαιρέθηκαν).
 		uint8_t len;
 		message_t radioRoutingRecPkt;
 		
@@ -842,7 +842,7 @@ implementation
 				
 		if(len == sizeof(RoutingMsg)) // Σίγουρα θα έχει αυτό το μέγεθος
 		{
-			// [Βήμα 1] ΑΦΑΙΡΕΣΗ: 'NotifyParentMsg* m;'
+			// ΑΦΑΙΡΕΣΗ: 'NotifyParentMsg* m;'
 			RoutingMsg * mpkt = (RoutingMsg*) (call RoutingPacket.getPayload(&radioRoutingRecPkt,len)); // Παίρνει ένα δείκτη στα δεδομένα του μηνύματος
 			
 			//if(TOS_NODE_ID >0)
@@ -851,7 +851,7 @@ implementation
 			//}
 			//
 			
-			// [Βήμα 2] ΑΛΛΑΓΗ: Στις 2 εκτυπώσεις 'mpkt->senderID' -> 'call RoutingAMPacket.source(&radioRoutingRecPkt)' (το senderID αφαιρέθηκε).
+			// ΑΛΛΑΓΗ: Στις 2 εκτυπώσεις 'mpkt->senderID' -> 'call RoutingAMPacket.source(&radioRoutingRecPkt)' (το senderID αφαιρέθηκε).
 			dbg("SRTreeC" , "receiveRoutingTask():senderID= %d , depth= %d \n", call RoutingAMPacket.source(&radioRoutingRecPkt) , mpkt->depth);
 #ifdef PRINTFDBG_MODE
 			printf("NodeID= %d , RoutingMsg received! \n",TOS_NODE_ID);
@@ -864,13 +864,13 @@ implementation
 				//NOTE: Ο έξυπνιος τρόπος να βρούμε ποιός είναια υτός που έστειλε το μήνυμα είναι η source (αντί για mpkt->senderID)
 				parentID= call RoutingAMPacket.source(&radioRoutingRecPkt);//mpkt->senderID;
 				curdepth= mpkt->depth + 1; // Το τρέχον βάθος είναι +1 αυτού που μου έστειλε το μήνυμα
-				// [Βήμα 3] ΠΡΟΣΘΗΚΗ: Ο κόμβος μαθαίνει το ερώτημα και την εποχή που διάλεξε η ρίζα.
+				// ΠΡΟΣΘΗΚΗ: Ο κόμβος μαθαίνει το ερώτημα και την εποχή που διάλεξε η ρίζα.
 				// (Αρκεί εδώ, την πρώτη φορά: όλα τα routing μηνύματα έχουν τις ίδιες τιμές.)
 				queryType = mpkt->queryType;
 				epochSec = mpkt->epochSec;
 				dbg("SRTreeC" , "NodeID= %d : learned queryType= %u , epochSec= %u \n", TOS_NODE_ID, queryType, epochSec);
 
-				// [Βήμα 4] ΥΛΟΠΟΙΗΘΗΚΕ (TODO: 'Στο TAG οι κόμβοι χρονοπρογραμματίζονται σύμφωνα με το βάθος τους. Οπότε εδώ που
+				// ΥΛΟΠΟΙΗΘΗΚΕ (TODO: 'Στο TAG οι κόμβοι χρονοπρογραμματίζονται σύμφωνα με το βάθος τους. Οπότε εδώ που
 				// βρίσκουμε το βάθος, μπορούμε να ξεκινάμε έναν timer που θα λέει το πότε λειτουργεί ο κόμβος (startPeriodic)'):
 				// Τώρα ξέρουμε το βάθος και την εποχή, οπότε ξεκινάμε τον περιοδικό μετρητή της εποχής (βλ. startEpochTimer()).
 				startEpochTimer();
@@ -878,41 +878,41 @@ implementation
 				printf("NodeID= %d : curdepth= %d , parentID= %d \n", TOS_NODE_ID ,curdepth , parentID);
 				printfflush();
 #endif
-				// [Βήμα 1] ΠΡΟΣΘΗΚΗ: Εκτύπωση με dbg (το printf από πάνω τυπώνει μόνο σε πραγματικό hardware),
+				// ΠΡΟΣΘΗΚΗ: Εκτύπωση με dbg (το printf από πάνω τυπώνει μόνο σε πραγματικό hardware),
 				// ώστε να φαίνεται στην προσομοίωση το δέντρο που χτίστηκε.
 				dbg("SRTreeC" , "NodeID= %d : curdepth= %d , parentID= %d \n", TOS_NODE_ID ,curdepth , parentID);
 
-				// [Βήμα 1] ΑΦΑΙΡΕΣΗ (TODO: 'Εδώ στέλνουμε ένα μήνυμα NotifyParentMsg ... στο TAG αυτό δεν το κάνουμε'):
+				// ΑΦΑΙΡΕΣΗ (TODO: 'Εδώ στέλνουμε ένα μήνυμα NotifyParentMsg ... στο TAG αυτό δεν το κάνουμε'):
 				// Εδώ ο κόμβος έφτιαχνε ένα NotifyParentMsg (senderID, depth, parentID) και το έβαζε στην NotifySendQueue
 				// για τον πατέρα του. Στο TAG ένας κόμβος Α καταλαβαίνει ότι είναι πατέρας του Β όταν λάβει δεδομένα του Β
 				// για το query (αφού τα παιδιά στέλνουν δεδομένα μόνο στον πατέρα), οπότε το μήνυμα είναι περιττό.
 
-				// [Βήμα 3] ΥΛΟΠΟΙΗΘΗΚΕ (TODO: 'Κάποιος που έλαβε ένα routing message για πρώτη φορά [...] πρέπει να στείλω
+				// ΥΛΟΠΟΙΗΘΗΚΕ (TODO: 'Κάποιος που έλαβε ένα routing message για πρώτη φορά [...] πρέπει να στείλω
 				// αυτό το routing message για να το ακούσουν και οι γείτονές μου'):
 				// Η προώθηση γίνεται από τον κώδικα που υπήρχε ήδη λίγο πιο κάτω: ο κόμβος ξεκινάει τον RoutingMsgTimer και,
 				// όταν αυτός χτυπήσει (μετά από TIMER_FAST_PERIOD), το RoutingMsgTimer.fired() κάνει broadcast ένα νέο
 				// RoutingMsg με το δικό του βάθος. Στο Βήμα 3 το μήνυμα αυτό μεταφέρει πλέον και τα queryType/epochSec
 				// (βλ. RoutingMsgTimer.fired()), οπότε το ερώτημα φτάνει σε όλους τους κόμβους μαζί με το δέντρο.
 
-				// [Βήμα 1] ΑΦΑΙΡΕΣΗ: Το 'if (call NotifySendQueue.enqueue(tmp)==SUCCESS) { ... post sendNotifyTask(); }'
+				// ΑΦΑΙΡΕΣΗ: Το 'if (call NotifySendQueue.enqueue(tmp)==SUCCESS) { ... post sendNotifyTask(); }'
 				// που έβαζε το NotifyParentMsg στην ουρά αποστολής (συνέχεια της παραπάνω αφαίρεσης).
 
 				// Αν δεν είμαι ο κόμβος 0, ξεκίνα έναν μετρητή για να στείλεις το 'routing message'
 				if (TOS_NODE_ID!=0)
 				{
-					// [Βήμα 3] ΑΛΛΑΓΗ: Ήταν 'call RoutingMsgTimer.startOneShot(TIMER_FAST_PERIOD);'
+					// ΑΛΛΑΓΗ: Ήταν 'call RoutingMsgTimer.startOneShot(TIMER_FAST_PERIOD);'
 					// Προστέθηκε τυχαία καθυστέρηση [0, TIMER_FAST_PERIOD). Με σταθερή καθυστέρηση, οι κόμβοι που άκουσαν το
 					// ίδιο routing μήνυμα (π.χ. όλα τα παιδιά της ρίζας) το ξαναέστελναν ΤΑΥΤΟΧΡΟΝΑ, τα μηνύματα συγκρούονταν
 					// και κάποιοι γείτονες δεν άκουγαν κανένα: στην προσομοίωση (grid 5x5, εμβέλεια 1) ένας κόμβος δεν μπήκε
 					// ποτέ στο δέντρο και άλλοι πήραν μεγαλύτερο βάθος από το ελάχιστο.
-					routingRepeatsLeft = ROUTING_REPEATS; // [Βήμα 11] ΠΡΟΣΘΗΚΗ
+					routingRepeatsLeft = ROUTING_REPEATS; // ΠΡΟΣΘΗΚΗ
 					call RoutingMsgTimer.startOneShot(TIMER_FAST_PERIOD + (call Random.rand16() % TIMER_FAST_PERIOD));
 				}
 			}
 			else
 			{
 				
-				// [Βήμα 2] ΑΛΛΑΓΗ: Ήταν 'if (( curdepth > mpkt->depth +1) || (mpkt->senderID==parentID))'.
+				// ΑΛΛΑΓΗ: Ήταν 'if (( curdepth > mpkt->depth +1) || (mpkt->senderID==parentID))'.
 				// Το 2ο σκέλος ('το μήνυμα ήρθε από τον πατέρα μου') αφαιρέθηκε μαζί με το senderID και δεν χρειάζεται:
 				//  - Στον αρχικό κώδικα η ρίζα ξανάστελνε routing σε κάθε γύρο, οπότε κάθε επανεκπομπή του πατέρα ανάγκαζε
 				//    το παιδί να ξαναστείλει κι αυτό routing (περιττές μεταδόσεις). Τώρα το δέντρο χτίζεται μία φορά (Βήμα 1).
@@ -921,7 +921,7 @@ implementation
 				// Έτσι ένας κόμβος αλλάζει πατέρα (και ξαναστέλνει routing) ΜΟΝΟ αν βρει συντομότερο μονοπάτι προς τη ρίζα.
 				if ( curdepth > mpkt->depth +1)
 				{
-					// [Βήμα 1] ΑΦΑΙΡΕΣΗ: 'uint16_t oldparentID = parentID;' (χρειαζόταν μόνο για το NotifyParentMsg προς τον παλιό πατέρα).
+					// ΑΦΑΙΡΕΣΗ: 'uint16_t oldparentID = parentID;' (χρειαζόταν μόνο για το NotifyParentMsg προς τον παλιό πατέρα).
 					
 					parentID= call RoutingAMPacket.source(&radioRoutingRecPkt);//mpkt->senderID;
 					curdepth = mpkt->depth + 1;
@@ -930,22 +930,22 @@ implementation
 					printf("NodeID= %d : curdepth= %d , parentID= %d \n", TOS_NODE_ID ,curdepth , parentID);
 					printfflush();
 #endif					
-					// [Βήμα 1] ΠΡΟΣΘΗΚΗ: Εκτύπωση με dbg της αλλαγής πατέρα (για να φαίνεται στην προσομοίωση).
+					// ΠΡΟΣΘΗΚΗ: Εκτύπωση με dbg της αλλαγής πατέρα (για να φαίνεται στην προσομοίωση).
 					dbg("SRTreeC" , "NodeID= %d : NEW curdepth= %d , parentID= %d \n", TOS_NODE_ID ,curdepth , parentID);
 
-					// [Βήμα 4] ΠΡΟΣΘΗΚΗ: Το βάθος άλλαξε, άρα αλλάζει και η στιγμή που λειτουργεί ο κόμβος μέσα στην εποχή.
+					// ΠΡΟΣΘΗΚΗ: Το βάθος άλλαξε, άρα αλλάζει και η στιγμή που λειτουργεί ο κόμβος μέσα στην εποχή.
 					// Ξαναξεκινάμε τον μετρητή (το startPeriodicAt αντικαθιστά την προηγούμενη ρύθμιση).
 					startEpochTimer();
 					
-					// [Βήμα 1] ΑΦΑΙΡΕΣΗ: Τα 2 NotifyParentMsg που στέλνονταν εδώ, ένα στον παλιό πατέρα και ένα στον νέο.
+					// ΑΦΑΙΡΕΣΗ: Τα 2 NotifyParentMsg που στέλνονταν εδώ, ένα στον παλιό πατέρα και ένα στον νέο.
 					// Στο TAG δεν χρειάζονται. Επιπλέον η συνθήκη του πρώτου,
 					// '(oldparentID<65535) || (oldparentID>0) || (oldparentID==parentID)', ήταν πάντα αληθής,
 					// οπότε στελνόταν μήνυμα ακόμα και όταν ο πατέρας δεν είχε αλλάξει.
 					
 					if (TOS_NODE_ID!=0)
 					{
-						// [Βήμα 3] ΑΛΛΑΓΗ: Ίδια τυχαία καθυστέρηση με παραπάνω (ήταν 'startOneShot(TIMER_FAST_PERIOD)').
-						routingRepeatsLeft = ROUTING_REPEATS; // [Βήμα 11] ΠΡΟΣΘΗΚΗ
+						// ΑΛΛΑΓΗ: Ίδια τυχαία καθυστέρηση με παραπάνω (ήταν 'startOneShot(TIMER_FAST_PERIOD)').
+						routingRepeatsLeft = ROUTING_REPEATS; // ΠΡΟΣΘΗΚΗ
 						call RoutingMsgTimer.startOneShot(TIMER_FAST_PERIOD + (call Random.rand16() % TIMER_FAST_PERIOD));
 					}
 				}
@@ -960,7 +960,7 @@ implementation
 			printf("receiveRoutingTask():Empty message!!! \n");
 			printfflush();
 #endif
-			// [Βήμα 1] ΑΦΑΙΡΕΣΗ: 'setLostRoutingRecTask(TRUE);' (νεκρός μηχανισμός 'lost task'). Το μήνυμα απλά αγνοείται.
+			// ΑΦΑΙΡΕΣΗ: 'setLostRoutingRecTask(TRUE);' (νεκρός μηχανισμός 'lost task'). Το μήνυμα απλά αγνοείται.
 			return;
 		}
 		
@@ -972,13 +972,13 @@ implementation
 ////////////////////////////////////////////////////////////////////////	
 	
 	 
-	// [Βήμα 1] ΑΦΑΙΡΕΣΗ: Το task receiveNotifyTask(). Επεξεργαζόταν τα NotifyParentMsg: οι κλάδοι 'προσθήκη/διαγραφή παιδιού'
+	// ΑΦΑΙΡΕΣΗ: Το task receiveNotifyTask(). Επεξεργαζόταν τα NotifyParentMsg: οι κλάδοι 'προσθήκη/διαγραφή παιδιού'
 	// ήταν κενοί, η ρίζα τα έστελνε στο PC μέσω σειριακής, και οι υπόλοιποι κόμβοι τα προωθούσαν στον πατέρα τους
 	// μέχρι τη ρίζα (πολλές περιττές μεταδόσεις).
 	
 
 	////////////////////////////////////////////////////////////////////////
-	// [Βήμα 7] ΠΡΟΣΘΗΚΗ: Βγάζει ένα μήνυμα συνάθροισης από την ουρά και το στέλνει στον πατέρα (ίδια λογική με το sendRoutingTask()).
+	// ΠΡΟΣΘΗΚΗ: Βγάζει ένα μήνυμα συνάθροισης από την ουρά και το στέλνει στον πατέρα (ίδια λογική με το sendRoutingTask()).
 	task void sendAggTask()
 	{
 		uint8_t mlen;
@@ -1004,8 +1004,8 @@ implementation
 			return;
 		}
 
-		aggRetries = 0; // [Βήμα 11] ΠΡΟΣΘΗΚΗ: καινούργιο μήνυμα
-		call AggAcks.requestAck(&radioAggSendPkt); // [Βήμα 11] ΠΡΟΣΘΗΚΗ: ζητάμε ACK από τον πατέρα
+		aggRetries = 0; // ΠΡΟΣΘΗΚΗ: καινούργιο μήνυμα
+		call AggAcks.requestAck(&radioAggSendPkt); // ΠΡΟΣΘΗΚΗ: ζητάμε ACK από τον πατέρα
 		if (call AggAMSend.send(mdest, &radioAggSendPkt, mlen) == SUCCESS)
 		{
 			AggSendBusy = TRUE;
@@ -1017,14 +1017,14 @@ implementation
 		}
 	}
 
-	// [Βήμα 8] ΠΡΟΣΘΗΚΗ: Βγάζει ένα μήνυμα από την ουρά λήψης και προσθέτει το μερικό αποτέλεσμα του παιδιού
+	// ΠΡΟΣΘΗΚΗ: Βγάζει ένα μήνυμα από την ουρά λήψης και προσθέτει το μερικό αποτέλεσμα του παιδιού
 	// στο μερικό αποτέλεσμα της τρέχουσας εποχής (childSum, childSumSq, childCount, childMax).
 	task void receiveAggTask()
 	{
 		message_t radioAggRecPkt;
 		uint8_t len;
-		uint16_t src; // [Βήμα 11] ΠΡΟΣΘΗΚΗ
-		uint8_t i; // [Βήμα 11] ΠΡΟΣΘΗΚΗ
+		uint16_t src; // ΠΡΟΣΘΗΚΗ
+		uint8_t i; // ΠΡΟΣΘΗΚΗ
 		SumAggMsg* sumMsg;
 		AvgAggMsg* avgMsg;
 		VarAggMsg* varMsg;
@@ -1040,7 +1040,7 @@ implementation
 			return;
 		}
 
-		// [Βήμα 11] ΠΡΟΣΘΗΚΗ: Αν έχουμε ήδη δεδομένα από αυτό το παιδί σε αυτή την εποχή, είναι επαναποστολή (χάθηκε το ACK):
+		// ΠΡΟΣΘΗΚΗ: Αν έχουμε ήδη δεδομένα από αυτό το παιδί σε αυτή την εποχή, είναι επαναποστολή (χάθηκε το ACK):
 		// την αγνοούμε, αλλιώς θα το μετρούσαμε δύο φορές. Αλλιώς το σημειώνουμε ως 'ακούστηκε'.
 		src = call AggAMPacket.source(&radioAggRecPkt);
 		for (i = 0; i < heardCount; i++)
