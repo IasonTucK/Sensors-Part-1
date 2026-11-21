@@ -26,6 +26,8 @@ module SRTreeC
 	uses interface Packet as AggPacket;
 	uses interface AMSend as AggAMSend;
 	uses interface AMPacket as AggAMPacket;
+	// [Βήμα 11] ΠΡΟΣΘΗΚΗ: Επιβεβαιώσεις λήψης (ACK) του επιπέδου ζεύξης για τα μηνύματα συνάθροισης.
+	uses interface PacketAcknowledgements as AggAcks;
 	
 	// [Βήμα 1] ΑΦΑΙΡΕΣΗ: Τα interfaces NotifyAMSend, NotifyAMPacket, NotifyPacket.
 	// Στο TAG δεν στέλνουμε NotifyParentMsg: ο πατέρας καταλαβαίνει τα παιδιά του όταν λάβει δεδομένα τους.
@@ -38,6 +40,10 @@ module SRTreeC
 	// [Βήμα 4] ΠΡΟΣΘΗΚΗ: Ο περιοδικός μετρητής της εποχής. Χτυπάει μία φορά ανά εποχή, τη στιγμή που ο κόμβος
 	// πρέπει να λειτουργήσει (ανάλογα με το βάθος του).
 	uses interface Timer<TMilli> as EpochTimer;
+	// [Βήμα 7] ΠΡΟΣΘΗΚΗ: Μετρητής μιας χρήσης για την τυχαία καθυστέρηση της αποστολής προς τον πατέρα, μέσα στο slot του κόμβου.
+	uses interface Timer<TMilli> as AggSendTimer;
+	// [Βήμα 11] ΠΡΟΣΘΗΚΗ: Μετρητής για την επαναποστολή ενός μηνύματος συνάθροισης που δεν επιβεβαιώθηκε.
+	uses interface Timer<TMilli> as AggRetryTimer;
 	// [Βήμα 1] ΑΦΑΙΡΕΣΗ: 'uses interface Timer<TMilli> as LostTaskTimer;'
 	// Η μόνη εντολή που τον ξεκινούσε ήταν σε σχόλιο, άρα δεν χτυπούσε ποτέ (νεκρός κώδικας).
 	
@@ -86,10 +92,38 @@ implementation
 	// από το RoutingMsg, κατά το χτίσιμο του δέντρου.
 	uint8_t queryType; // 1=SUM, 2=AVG, 3=VARIANCE, 4=MAX
 	uint8_t epochSec; // Διάρκεια εποχής σε δευτερόλεπτα (30, 40, ..., 100)
+
+	// [Βήμα 6] ΠΡΟΣΘΗΚΗ: Η μέτρηση του κόμβου στην τρέχουσα εποχή.
+	uint8_t measurement;
+
+	// [Βήμα 8] ΠΡΟΣΘΗΚΗ: Το μερικό αποτέλεσμα που έχουν στείλει τα παιδιά στην τρέχουσα εποχή (συνδυασμένο).
+	// Ανάλογα με το ερώτημα χρησιμοποιούνται μόνο κάποια από αυτά: SUM -> childSum, AVG -> childSum/childCount,
+	// VARIANCE -> childSum/childSumSq/childCount, MAX -> childMax. Μηδενίζονται μετά από κάθε αποστολή (resetChildData()).
+	uint16_t childSum;
+	uint32_t childSumSq;
+	uint8_t childCount;
+	uint8_t childMax;
+
+	// [Βήμα 7] ΠΡΟΣΘΗΚΗ: Αποστολή των δεδομένων συνάθροισης (ίδια λογική με τα routing μηνύματα: ουρά + task + busy).
+	message_t radioAggSendPkt;
+	bool AggSendBusy=FALSE;
+	// TRUE από τη στιγμή που χτυπάει ο EpochTimer μέχρι να φύγει το μήνυμα προς τον πατέρα (στη διάρκεια της τυχαίας
+	// καθυστέρησης). Τότε δεχόμαστε ακόμα δεδομένα από τα παιδιά για την τρέχουσα εποχή.
+	bool aggPending=FALSE;
+
+	// [Βήμα 11] ΠΡΟΣΘΗΚΗ: Αξιοπιστία.
+	uint8_t aggRetries; // Πόσες επαναποστολές έχουν γίνει για το τρέχον μήνυμα συνάθροισης
+	uint8_t routingRepeatsLeft; // Πόσες ακόμα φορές θα σταλεί το routing μήνυμα του κόμβου
+	// Τα παιδιά από τα οποία λάβαμε ήδη δεδομένα στην τρέχουσα εποχή. Αν χαθεί το ACK, το παιδί ξαναστέλνει το ίδιο
+	// μήνυμα, και χωρίς αυτόν τον έλεγχο θα το μετρούσαμε δύο φορές.
+	uint16_t heardChildren[MAX_CHILDREN];
+	uint8_t heardCount;
 	
 	// Αυτά είναι 'tasks' που ορίζω παρακάτω
 	task void sendRoutingTask();
 	task void receiveRoutingTask();
+	task void sendAggTask(); // [Βήμα 7] ΠΡΟΣΘΗΚΗ
+	task void receiveAggTask(); // [Βήμα 8] ΠΡΟΣΘΗΚΗ
 	// [Βήμα 1] ΑΦΑΙΡΕΣΗ: Οι δηλώσεις των tasks sendNotifyTask() και receiveNotifyTask().
 	
 	// [Βήμα 1] ΑΦΑΙΡΕΣΗ: Οι συναρτήσεις setLostRoutingSendTask(), setLostNotifySendTask(), setLostNotifyRecTask(),
@@ -113,6 +147,79 @@ implementation
 		call EpochTimer.startPeriodicAt((uint32_t)0 - offset, epochMilli);
 		dbg("SRTreeC", "NodeID= %d : EpochTimer started, depth= %u , first fire at %u ms, period %u ms \n",
 			TOS_NODE_ID, curdepth, epochMilli - offset, epochMilli);
+	}
+
+	// [Βήμα 6] ΠΡΟΣΘΗΚΗ: Νέα μέτρηση σε κάθε εποχή. Στην 1η εποχή τυχαίος ακέραιος στο [1..100]. Στις επόμενες, τυχαίος
+	// ακέραιος που απέχει το πολύ 25% από την προηγούμενη μέτρηση (low..high) και πάντα στο [1..100].
+	void takeMeasurement()
+	{
+		uint8_t delta, low, high;
+
+		if (roundCounter == 1)
+		{
+			measurement = (call Random.rand16() % 100) + 1;
+		}
+		else
+		{
+			delta = measurement / 4; // 25% της προηγούμενης μέτρησης (στρογγυλοποίηση προς τα κάτω)
+			low = measurement - delta; // >= 1, αφού delta < measurement
+			high = (measurement + delta > 100) ? 100 : measurement + delta;
+			measurement = low + (call Random.rand16() % (high - low + 1));
+		}
+		dbg("Measurements", "epoch= %u node= %u depth= %u parent= %u measurement= %u \n",
+			roundCounter, TOS_NODE_ID, curdepth, parentID, measurement);
+	}
+
+	// [Βήμα 8] ΠΡΟΣΘΗΚΗ: Μηδενίζει το μερικό αποτέλεσμα των παιδιών, για να ξεκινήσει η επόμενη εποχή από την αρχή.
+	void resetChildData()
+	{
+		childSum = 0;
+		childSumSq = 0;
+		childCount = 0;
+		childMax = 0;
+		heardCount = 0; // [Βήμα 11] ΠΡΟΣΘΗΚΗ: καινούργια εποχή, κανένα παιδί δεν έχει στείλει ακόμα
+	}
+
+	// [Βήμα 7] ΠΡΟΣΘΗΚΗ: Το μέγεθος (σε bytes) του μηνύματος συνάθροισης για το τρέχον ερώτημα.
+	uint8_t aggMsgLength()
+	{
+		switch (queryType)
+		{
+			case 1: return sizeof(SumAggMsg);
+			case 2: return sizeof(AvgAggMsg);
+			case 3: return sizeof(VarAggMsg);
+			case 4: return sizeof(MaxAggMsg);
+			default: return 0;
+		}
+	}
+
+	// [Βήμα 9] ΠΡΟΣΘΗΚΗ: Η ρίζα συνδυάζει τη δική της μέτρηση με τα δεδομένα των παιδιών της και τυπώνει το τελικό
+	// αποτέλεσμα της εποχής. AVG = sum/count και VARIANCE = sumSq/count - (sum/count)^2 υπολογίζονται μόνο εδώ.
+	void printResult()
+	{
+		uint16_t sum = childSum + measurement;
+		uint32_t sumSq = childSumSq + (uint32_t)measurement * measurement;
+		uint8_t count = childCount + 1;
+		uint8_t maxVal = (childMax > measurement) ? childMax : measurement;
+		double mean;
+
+		switch (queryType)
+		{
+			case 1:
+				dbg("Results", "EPOCH %u : SUM = %u \n", roundCounter, sum);
+				break;
+			case 2:
+				dbg("Results", "EPOCH %u : AVG = %.2f (sum= %u , count= %u) \n", roundCounter, (double)sum / count, sum, count);
+				break;
+			case 3:
+				mean = (double)sum / count;
+				dbg("Results", "EPOCH %u : VARIANCE = %.2f (sum= %u , sumSq= %lu , count= %u) \n",
+					roundCounter, (double)sumSq / count - mean * mean, sum, (unsigned long)sumSq, count);
+				break;
+			case 4:
+				dbg("Results", "EPOCH %u : MAX = %u \n", roundCounter, maxVal);
+				break;
+		}
 	}
 
 	void setRoutingSendBusy(bool state)
@@ -140,6 +247,7 @@ implementation
 		setRoutingSendBusy(FALSE);
 		// [Βήμα 1] ΑΦΑΙΡΕΣΗ: 'setNotifySendBusy(FALSE);' και 'setSerialBusy(FALSE);'
 		roundCounter =0;
+		resetChildData(); // [Βήμα 8] ΠΡΟΣΘΗΚΗ
 
 		// [Βήμα 3] ΠΡΟΣΘΗΚΗ: Seed της γεννήτριας με τον χρόνο της προσομοίωσης τη στιγμή του boot (όπως στο lab4).
 		// Ο χρόνος αυτός εξαρτάται από το bootAtTime() του mySimulation.py.
@@ -194,6 +302,7 @@ implementation
 				// [Βήμα 4] ΠΡΟΣΘΗΚΗ: Η ρίζα (βάθος 0) ξεκινάει τον μετρητή της εποχής: χτυπάει στο τέλος κάθε εποχής.
 				startEpochTimer();
 
+				routingRepeatsLeft = ROUTING_REPEATS; // [Βήμα 11] ΠΡΟΣΘΗΚΗ
 				call RoutingMsgTimer.startOneShot(TIMER_FAST_PERIOD);
 			}
 		}
@@ -285,6 +394,19 @@ implementation
 		call RoutingPacket.setPayloadLength(&tmp, sizeof(RoutingMsg));
 		
 		enqueueDone=call RoutingSendQueue.enqueue(tmp); // Το βάζουμε στην ουρά των μηνυμάτων
+
+		// [Βήμα 11] ΠΡΟΣΘΗΚΗ: Το routing μήνυμα στέλνεται ROUTING_REPEATS φορές, με τυχαίο διάστημα μεταξύ τους.
+		// Αφού το δέντρο χτίζεται μόνο μία φορά, αν χανόταν το μοναδικό routing μήνυμα ενός κόμβου (θόρυβος ή σύγκρουση),
+		// ένας γείτονας που μπορεί να το ακούσει μόνο από αυτόν δεν θα έμπαινε ποτέ στο δέντρο (το είδαμε στην προσομοίωση).
+		// Κόστος: ένα επιπλέον μήνυμα 3 bytes ανά κόμβο, μία φορά στην αρχή. Η επανάληψη αγνοείται από όσους έχουν ήδη πατέρα.
+		if (routingRepeatsLeft > 0)
+		{
+			routingRepeatsLeft--;
+		}
+		if (routingRepeatsLeft > 0)
+		{
+			call RoutingMsgTimer.startOneShot(TIMER_FAST_PERIOD + (call Random.rand16() % TIMER_FAST_PERIOD));
+		}
 		
 		if( enqueueDone==SUCCESS) // Αν η ουρά δεν είναι γεμάτη
 		{
@@ -317,9 +439,7 @@ implementation
 	}
 	
 	// [Βήμα 4] ΠΡΟΣΘΗΚΗ: Χτυπάει μία φορά σε κάθε εποχή, στο slot του κόμβου (βλ. startEpochTimer()).
-	// Προς το παρόν μόνο μετράει τις εποχές και τυπώνει, για να ελέγξουμε τη σειρά (πρώτα τα παιδιά, μετά οι γονείς).
-	// Στο επόμενο βήμα εδώ θα γίνεται: νέα μέτρηση, συνάθροιση με τα δεδομένα των παιδιών και αποστολή στον πατέρα
-	// (ή, στη ρίζα, εκτύπωση του τελικού αποτελέσματος).
+	// Μέχρι αυτή τη στιγμή τα παιδιά (ένα slot νωρίτερα) έχουν ήδη στείλει τα δεδομένα τους.
 	event void EpochTimer.fired()
 	{
 		roundCounter += 1;
@@ -330,7 +450,99 @@ implementation
 			dbg("SRTreeC", "#######   EPOCH   %u    ############## \n", roundCounter);
 			dbg("SRTreeC", "#####################################\n");
 		}
-		dbg("SRTreeC", "%s NodeID= %d : EpochTimer fired, epoch= %u , depth= %u \n", sim_time_string(), TOS_NODE_ID, roundCounter, curdepth);
+		// [Βήμα 6] ΑΛΛΑΓΗ: Αφαιρέθηκε το sim_time_string() από την εκτύπωση (το dbg τυπώνει ήδη τον χρόνο).
+		dbg("SRTreeC", "NodeID= %d : EpochTimer fired, epoch= %u , depth= %u \n", TOS_NODE_ID, roundCounter, curdepth);
+
+		// [Βήμα 6] ΠΡΟΣΘΗΚΗ: Νέα μέτρηση της εποχής.
+		takeMeasurement();
+
+		if (TOS_NODE_ID==0)
+		{
+			// [Βήμα 9] ΠΡΟΣΘΗΚΗ: Η ρίζα είναι η τελευταία που λειτουργεί στην εποχή (ακριβώς στο τέλος της):
+			// τυπώνει το τελικό αποτέλεσμα και ξεκινάει την επόμενη εποχή από την αρχή.
+			printResult();
+			resetChildData();
+		}
+		else
+		{
+			// [Βήμα 7] ΠΡΟΣΘΗΚΗ: Κάθε άλλος κόμβος στέλνει στον πατέρα του μετά από τυχαία καθυστέρηση στο [0, TIMER_SLOT_MILLI/2).
+			// Έτσι τα αδέρφια (ίδιο βάθος, ίδιο slot) δεν στέλνουν ταυτόχρονα (λιγότερες συγκρούσεις), και το μήνυμα φτάνει
+			// τουλάχιστον μισό slot πριν λειτουργήσει ο πατέρας.
+			aggPending = TRUE;
+			call AggSendTimer.startOneShot(call Random.rand16() % (TIMER_SLOT_MILLI / 2));
+		}
+	}
+
+	// [Βήμα 7] ΠΡΟΣΘΗΚΗ: Φτιάχνει το μερικό αποτέλεσμα του υποδέντρου (δική μας μέτρηση + δεδομένα παιδιών) στη δομή
+	// του ερωτήματος και το βάζει στην ουρά αποστολής προς τον πατέρα (unicast).
+	event void AggSendTimer.fired()
+	{
+		message_t tmp;
+		SumAggMsg* sumMsg;
+		AvgAggMsg* avgMsg;
+		VarAggMsg* varMsg;
+		MaxAggMsg* maxMsg;
+		uint8_t len = aggMsgLength();
+
+		aggPending = FALSE;
+
+		if (len == 0)
+		{
+			dbg("SRTreeC", "AggSendTimer.fired(): unknown queryType= %u \n", queryType);
+			return;
+		}
+		if (call AggSendQueue.full())
+		{
+			dbg("SRTreeC", "AggSendQueue is FULL!!! \n");
+			resetChildData();
+			return;
+		}
+
+		switch (queryType)
+		{
+			case 1:
+				sumMsg = (SumAggMsg*) (call AggPacket.getPayload(&tmp, len));
+				if (sumMsg == NULL) return;
+				sumMsg->sum = childSum + measurement;
+				break;
+			case 2:
+				avgMsg = (AvgAggMsg*) (call AggPacket.getPayload(&tmp, len));
+				if (avgMsg == NULL) return;
+				avgMsg->sum = childSum + measurement;
+				avgMsg->count = childCount + 1;
+				break;
+			case 3:
+				varMsg = (VarAggMsg*) (call AggPacket.getPayload(&tmp, len));
+				if (varMsg == NULL) return;
+				varMsg->sum = childSum + measurement;
+				varMsg->sumSq = childSumSq + (uint32_t)measurement * measurement;
+				varMsg->count = childCount + 1;
+				break;
+			case 4:
+				maxMsg = (MaxAggMsg*) (call AggPacket.getPayload(&tmp, len));
+				if (maxMsg == NULL) return;
+				maxMsg->maxVal = (childMax > measurement) ? childMax : measurement;
+				break;
+		}
+
+		// Το μήνυμα πάει ΜΟΝΟ στον πατέρα. Έτσι ο πατέρας αναγνωρίζει τα παιδιά του (βλ. TODO για το NotifyParentMsg).
+		call AggAMPacket.setDestination(&tmp, parentID);
+		call AggPacket.setPayloadLength(&tmp, len);
+
+		// Τα δεδομένα των παιδιών αυτής της εποχής μπήκαν στο μήνυμα: μηδενίζουμε για την επόμενη εποχή.
+		resetChildData();
+
+		if (call AggSendQueue.enqueue(tmp) == SUCCESS)
+		{
+			if (call AggSendQueue.size() == 1)
+			{
+				post sendAggTask();
+			}
+		}
+		else
+		{
+			dbg("SRTreeC", "AggMsg failed to be enqueued in AggSendQueue!!! \n");
+		}
 	}
 
 	event void Led0Timer.fired()
@@ -374,16 +586,85 @@ implementation
 	
 	// [Βήμα 1] ΑΦΑΙΡΕΣΗ: Τα events NotifyAMSend.sendDone() (NotifyParentMsg) και SerialAMSend.sendDone() (σειριακή θύρα).
 	
-	// [Βήμα 1] ΠΡΟΣΘΗΚΗ: Κενό event για το AggAMSend. Το nesC απαιτεί να υλοποιούνται όλα τα events των interfaces
-	// που χρησιμοποιούμε, αλλιώς δεν κάνει compile ('AggAMSend.sendDone not implemented').
-	// Θα συμπληρωθεί στο βήμα της αποστολής των δεδομένων συνάθροισης.
+	// [Βήμα 1] ΠΡΟΣΘΗΚΗ: Event για το AggAMSend (το nesC απαιτεί να υλοποιούνται όλα τα events των interfaces).
+	// [Βήμα 7] ΥΛΟΠΟΙΗΣΗ: Η αποστολή τελείωσε: ο ασύρματος είναι ξανά ελεύθερος και, αν υπάρχει κι άλλο μήνυμα στην ουρά, το στέλνουμε.
 	event void AggAMSend.sendDone(message_t * msg , error_t err)
 	{
+		dbg("SRTreeC", "An Agg package sent... %s , acked= %u \n", (err==SUCCESS)?"True":"False", call AggAcks.wasAcked(msg));
+
+		// [Βήμα 11] ΠΡΟΣΘΗΚΗ: Αν ο πατέρας δεν επιβεβαίωσε τη λήψη (π.χ. σύγκρουση με αδερφό που δεν μας ακούει), ξαναστέλνουμε
+		// το ίδιο μήνυμα μετά από μια μικρή τυχαία καθυστέρηση, το πολύ AGG_MAX_RETRIES φορές. Ο ασύρματος μένει 'busy'.
+		if ((err != SUCCESS || !(call AggAcks.wasAcked(msg))) && aggRetries < AGG_MAX_RETRIES)
+		{
+			aggRetries++;
+			call AggRetryTimer.startOneShot(1 + (call Random.rand16() % 10));
+			return;
+		}
+		if (err != SUCCESS || !(call AggAcks.wasAcked(msg)))
+		{
+			dbg("SRTreeC", "AggMsg to %u NOT acknowledged after %u retries \n", parentID, aggRetries);
+		}
+
+		AggSendBusy = FALSE;
+
+		if (!(call AggSendQueue.empty()))
+		{
+			post sendAggTask();
+		}
 	}
 	
-	// [Βήμα 1] ΠΡΟΣΘΗΚΗ: Κενό event για το AggReceive (ίδιος λόγος). Θα συμπληρωθεί στο βήμα της λήψης των δεδομένων συνάθροισης.
+	// [Βήμα 11] ΠΡΟΣΘΗΚΗ: Επαναποστολή του μηνύματος συνάθροισης που δεν επιβεβαιώθηκε (είναι ακόμα στο radioAggSendPkt).
+	event void AggRetryTimer.fired()
+	{
+		uint8_t mlen = call AggPacket.payloadLength(&radioAggSendPkt);
+		uint16_t mdest = call AggAMPacket.destination(&radioAggSendPkt);
+
+		call AggAcks.requestAck(&radioAggSendPkt);
+		if (call AggAMSend.send(mdest, &radioAggSendPkt, mlen) == SUCCESS)
+		{
+			dbg("Messages", "epoch= %u node= %u to= %u bytes= %u retry= %u \n", roundCounter, TOS_NODE_ID, mdest, mlen, aggRetries);
+		}
+		else if (aggRetries < AGG_MAX_RETRIES)
+		{
+			aggRetries++;
+			call AggRetryTimer.startOneShot(1 + (call Random.rand16() % 10));
+		}
+		else
+		{
+			AggSendBusy = FALSE;
+		}
+	}
+
+	// [Βήμα 1] ΠΡΟΣΘΗΚΗ: Event για το AggReceive.
+	// [Βήμα 8] ΥΛΟΠΟΙΗΣΗ: Λήψη δεδομένων συνάθροισης από ένα παιδί. Τα μηνύματα είναι unicast, οπότε φτάνουν εδώ μόνο όσα
+	// έχουν προορισμό εμάς, δηλαδή μόνο από τα παιδιά μας. Όπως και στο routing, αντιγράφουμε το μήνυμα στην ουρά λήψης
+	// και η επεξεργασία γίνεται στο receiveAggTask().
 	event message_t* AggReceive.receive( message_t * msg , void * payload, uint8_t len)
 	{
+		message_t tmp;
+		uint32_t untilFire;
+
+		// Δεχόμαστε δεδομένα μόνο για την τρέχουσα εποχή: είτε λίγο πριν χτυπήσει ο δικός μας EpochTimer (το πολύ 2 slots,
+		// τότε στέλνουν τα παιδιά), είτε αφού χτύπησε αλλά δεν έχουμε στείλει ακόμα (aggPending). Ένα μήνυμα που φτάνει
+		// αργότερα ανήκει σε εποχή που έχουμε ήδη στείλει: το αγνοούμε, αλλιώς θα μετρούσε λάθος στην επόμενη εποχή.
+		untilFire = (call EpochTimer.gett0() + call EpochTimer.getdt()) - call EpochTimer.getNow();
+		if (!(call EpochTimer.isRunning()) || (!aggPending && untilFire > 2 * TIMER_SLOT_MILLI))
+		{
+			dbg("SRTreeC", "LATE Agg package from %u ignored \n", call AggAMPacket.source(msg));
+			return msg;
+		}
+
+		atomic{
+		memcpy(&tmp, msg, sizeof(message_t));
+		}
+		if (call AggReceiveQueue.enqueue(tmp) == SUCCESS)
+		{
+			post receiveAggTask();
+		}
+		else
+		{
+			dbg("SRTreeC", "AggMsg enqueue failed!!! \n");
+		}
 		return msg;
 	}
 	
@@ -624,6 +905,7 @@ implementation
 					// ίδιο routing μήνυμα (π.χ. όλα τα παιδιά της ρίζας) το ξαναέστελναν ΤΑΥΤΟΧΡΟΝΑ, τα μηνύματα συγκρούονταν
 					// και κάποιοι γείτονες δεν άκουγαν κανένα: στην προσομοίωση (grid 5x5, εμβέλεια 1) ένας κόμβος δεν μπήκε
 					// ποτέ στο δέντρο και άλλοι πήραν μεγαλύτερο βάθος από το ελάχιστο.
+					routingRepeatsLeft = ROUTING_REPEATS; // [Βήμα 11] ΠΡΟΣΘΗΚΗ
 					call RoutingMsgTimer.startOneShot(TIMER_FAST_PERIOD + (call Random.rand16() % TIMER_FAST_PERIOD));
 				}
 			}
@@ -663,6 +945,7 @@ implementation
 					if (TOS_NODE_ID!=0)
 					{
 						// [Βήμα 3] ΑΛΛΑΓΗ: Ίδια τυχαία καθυστέρηση με παραπάνω (ήταν 'startOneShot(TIMER_FAST_PERIOD)').
+						routingRepeatsLeft = ROUTING_REPEATS; // [Βήμα 11] ΠΡΟΣΘΗΚΗ
 						call RoutingMsgTimer.startOneShot(TIMER_FAST_PERIOD + (call Random.rand16() % TIMER_FAST_PERIOD));
 					}
 				}
@@ -693,4 +976,113 @@ implementation
 	// ήταν κενοί, η ρίζα τα έστελνε στο PC μέσω σειριακής, και οι υπόλοιποι κόμβοι τα προωθούσαν στον πατέρα τους
 	// μέχρι τη ρίζα (πολλές περιττές μεταδόσεις).
 	
+
+	////////////////////////////////////////////////////////////////////////
+	// [Βήμα 7] ΠΡΟΣΘΗΚΗ: Βγάζει ένα μήνυμα συνάθροισης από την ουρά και το στέλνει στον πατέρα (ίδια λογική με το sendRoutingTask()).
+	task void sendAggTask()
+	{
+		uint8_t mlen;
+		uint16_t mdest;
+
+		if (call AggSendQueue.empty())
+		{
+			return;
+		}
+		if (AggSendBusy)
+		{
+			// Θα ξαναγίνει post από το AggAMSend.sendDone(), αφού η ουρά δεν είναι άδεια.
+			return;
+		}
+
+		radioAggSendPkt = call AggSendQueue.dequeue();
+		mlen = call AggPacket.payloadLength(&radioAggSendPkt);
+		mdest = call AggAMPacket.destination(&radioAggSendPkt);
+
+		if (mlen != aggMsgLength())
+		{
+			dbg("SRTreeC", "sendAggTask(): Unknown message!!! \n");
+			return;
+		}
+
+		aggRetries = 0; // [Βήμα 11] ΠΡΟΣΘΗΚΗ: καινούργιο μήνυμα
+		call AggAcks.requestAck(&radioAggSendPkt); // [Βήμα 11] ΠΡΟΣΘΗΚΗ: ζητάμε ACK από τον πατέρα
+		if (call AggAMSend.send(mdest, &radioAggSendPkt, mlen) == SUCCESS)
+		{
+			AggSendBusy = TRUE;
+			dbg("Messages", "epoch= %u node= %u to= %u bytes= %u \n", roundCounter, TOS_NODE_ID, mdest, mlen);
+		}
+		else
+		{
+			dbg("SRTreeC", "sendAggTask(): send failed!!! \n");
+		}
+	}
+
+	// [Βήμα 8] ΠΡΟΣΘΗΚΗ: Βγάζει ένα μήνυμα από την ουρά λήψης και προσθέτει το μερικό αποτέλεσμα του παιδιού
+	// στο μερικό αποτέλεσμα της τρέχουσας εποχής (childSum, childSumSq, childCount, childMax).
+	task void receiveAggTask()
+	{
+		message_t radioAggRecPkt;
+		uint8_t len;
+		uint16_t src; // [Βήμα 11] ΠΡΟΣΘΗΚΗ
+		uint8_t i; // [Βήμα 11] ΠΡΟΣΘΗΚΗ
+		SumAggMsg* sumMsg;
+		AvgAggMsg* avgMsg;
+		VarAggMsg* varMsg;
+		MaxAggMsg* maxMsg;
+
+		radioAggRecPkt = call AggReceiveQueue.dequeue();
+		len = call AggPacket.payloadLength(&radioAggRecPkt);
+
+		// Όλοι ξέρουμε το queryType, άρα και το μέγεθος του μηνύματος που περιμένουμε.
+		if (len != aggMsgLength())
+		{
+			dbg("SRTreeC", "receiveAggTask(): Unknown message (len= %u)!!! \n", len);
+			return;
+		}
+
+		// [Βήμα 11] ΠΡΟΣΘΗΚΗ: Αν έχουμε ήδη δεδομένα από αυτό το παιδί σε αυτή την εποχή, είναι επαναποστολή (χάθηκε το ACK):
+		// την αγνοούμε, αλλιώς θα το μετρούσαμε δύο φορές. Αλλιώς το σημειώνουμε ως 'ακούστηκε'.
+		src = call AggAMPacket.source(&radioAggRecPkt);
+		for (i = 0; i < heardCount; i++)
+		{
+			if (heardChildren[i] == src)
+			{
+				dbg("SRTreeC", "receiveAggTask(): duplicate from child %u ignored \n", src);
+				return;
+			}
+		}
+		if (heardCount < MAX_CHILDREN)
+		{
+			heardChildren[heardCount] = src;
+			heardCount++;
+		}
+
+		switch (queryType)
+		{
+			case 1:
+				sumMsg = (SumAggMsg*) (call AggPacket.getPayload(&radioAggRecPkt, len));
+				childSum += sumMsg->sum;
+				break;
+			case 2:
+				avgMsg = (AvgAggMsg*) (call AggPacket.getPayload(&radioAggRecPkt, len));
+				childSum += avgMsg->sum;
+				childCount += avgMsg->count;
+				break;
+			case 3:
+				varMsg = (VarAggMsg*) (call AggPacket.getPayload(&radioAggRecPkt, len));
+				childSum += varMsg->sum;
+				childSumSq += varMsg->sumSq;
+				childCount += varMsg->count;
+				break;
+			case 4:
+				maxMsg = (MaxAggMsg*) (call AggPacket.getPayload(&radioAggRecPkt, len));
+				if (maxMsg->maxVal > childMax)
+				{
+					childMax = maxMsg->maxVal;
+				}
+				break;
+		}
+		dbg("SRTreeC", "receiveAggTask(): data from child %u merged \n", call AggAMPacket.source(&radioAggRecPkt));
+	}
+
 }
