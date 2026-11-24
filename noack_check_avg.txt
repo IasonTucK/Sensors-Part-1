@@ -1,0 +1,12 @@
+Query: AVG, epoch: 80 s
+Epoch  Nodes  Expected     Root         OK     AggMsgs   Bytes 
+1      6      71.00        71.00        yes    5         15    
+2      6      70.00        70.00        yes    5         15    
+3      6      66.50        66.50        yes    5         15    
+4      6      70.00        70.00        yes    5         15    
+5      6      65.50        65.50        yes    5         15    
+6      6      67.83        48.67        NO     5         15    
+7      6      61.33        61.33        yes    5         15    
+8      6      57.00        57.00        yes    5         15    
+9      6      59.17        59.17        yes    5         15    
+Correct epochs: 8 / 9
