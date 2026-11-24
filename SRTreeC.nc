@@ -26,8 +26,6 @@ module SRTreeC
 	uses interface Packet as AggPacket;
 	uses interface AMSend as AggAMSend;
 	uses interface AMPacket as AggAMPacket;
-	// ΠΡΟΣΘΗΚΗ: Επιβεβαιώσεις λήψης (ACK) του επιπέδου ζεύξης για τα μηνύματα συνάθροισης.
-	uses interface PacketAcknowledgements as AggAcks;
 	
 	// ΑΦΑΙΡΕΣΗ: Τα interfaces NotifyAMSend, NotifyAMPacket, NotifyPacket.
 	// Στο TAG δεν στέλνουμε NotifyParentMsg: ο πατέρας καταλαβαίνει τα παιδιά του όταν λάβει δεδομένα τους.
@@ -42,8 +40,6 @@ module SRTreeC
 	uses interface Timer<TMilli> as EpochTimer;
 	// ΠΡΟΣΘΗΚΗ: Μετρητής μιας χρήσης για την τυχαία καθυστέρηση της αποστολής προς τον πατέρα, μέσα στο slot του κόμβου.
 	uses interface Timer<TMilli> as AggSendTimer;
-	// ΠΡΟΣΘΗΚΗ: Μετρητής για την επαναποστολή ενός μηνύματος συνάθροισης που δεν επιβεβαιώθηκε.
-	uses interface Timer<TMilli> as AggRetryTimer;
 	// ΑΦΑΙΡΕΣΗ: 'uses interface Timer<TMilli> as LostTaskTimer;'
 	// Η μόνη εντολή που τον ξεκινούσε ήταν σε σχόλιο, άρα δεν χτυπούσε ποτέ (νεκρός κώδικας).
 	
@@ -111,13 +107,6 @@ implementation
 	// καθυστέρησης). Τότε δεχόμαστε ακόμα δεδομένα από τα παιδιά για την τρέχουσα εποχή.
 	bool aggPending=FALSE;
 
-	// ΠΡΟΣΘΗΚΗ: Αξιοπιστία.
-	uint8_t aggRetries; // Πόσες επαναποστολές έχουν γίνει για το τρέχον μήνυμα συνάθροισης
-	uint8_t routingRepeatsLeft; // Πόσες ακόμα φορές θα σταλεί το routing μήνυμα του κόμβου
-	// Τα παιδιά από τα οποία λάβαμε ήδη δεδομένα στην τρέχουσα εποχή. Αν χαθεί το ACK, το παιδί ξαναστέλνει το ίδιο
-	// μήνυμα, και χωρίς αυτόν τον έλεγχο θα το μετρούσαμε δύο φορές.
-	uint16_t heardChildren[MAX_CHILDREN];
-	uint8_t heardCount;
 	
 	// Αυτά είναι 'tasks' που ορίζω παρακάτω
 	task void sendRoutingTask();
@@ -177,7 +166,6 @@ implementation
 		childSumSq = 0;
 		childCount = 0;
 		childMax = 0;
-		heardCount = 0; // ΠΡΟΣΘΗΚΗ: καινούργια εποχή, κανένα παιδί δεν έχει στείλει ακόμα
 	}
 
 	// ΠΡΟΣΘΗΚΗ: Το μέγεθος (σε bytes) του μηνύματος συνάθροισης για το τρέχον ερώτημα.
@@ -302,7 +290,6 @@ implementation
 				// ΠΡΟΣΘΗΚΗ: Η ρίζα (βάθος 0) ξεκινάει τον μετρητή της εποχής: χτυπάει στο τέλος κάθε εποχής.
 				startEpochTimer();
 
-				routingRepeatsLeft = ROUTING_REPEATS; // ΠΡΟΣΘΗΚΗ
 				call RoutingMsgTimer.startOneShot(TIMER_FAST_PERIOD);
 			}
 		}
@@ -395,19 +382,6 @@ implementation
 		
 		enqueueDone=call RoutingSendQueue.enqueue(tmp); // Το βάζουμε στην ουρά των μηνυμάτων
 
-		// ΠΡΟΣΘΗΚΗ: Το routing μήνυμα στέλνεται ROUTING_REPEATS φορές, με τυχαίο διάστημα μεταξύ τους.
-		// Αφού το δέντρο χτίζεται μόνο μία φορά, αν χανόταν το μοναδικό routing μήνυμα ενός κόμβου (θόρυβος ή σύγκρουση),
-		// ένας γείτονας που μπορεί να το ακούσει μόνο από αυτόν δεν θα έμπαινε ποτέ στο δέντρο (το είδαμε στην προσομοίωση).
-		// Κόστος: ένα επιπλέον μήνυμα 3 bytes ανά κόμβο, μία φορά στην αρχή. Η επανάληψη αγνοείται από όσους έχουν ήδη πατέρα.
-		if (routingRepeatsLeft > 0)
-		{
-			routingRepeatsLeft--;
-		}
-		if (routingRepeatsLeft > 0)
-		{
-			call RoutingMsgTimer.startOneShot(TIMER_FAST_PERIOD + (call Random.rand16() % TIMER_FAST_PERIOD));
-		}
-		
 		if( enqueueDone==SUCCESS) // Αν η ουρά δεν είναι γεμάτη
 		{
 			// Αν είναι το 1ο μήνυμα στην ουρά, κάνε 'sendRoutingTask'
@@ -590,21 +564,9 @@ implementation
 	// ΥΛΟΠΟΙΗΣΗ: Η αποστολή τελείωσε: ο ασύρματος είναι ξανά ελεύθερος και, αν υπάρχει κι άλλο μήνυμα στην ουρά, το στέλνουμε.
 	event void AggAMSend.sendDone(message_t * msg , error_t err)
 	{
-		dbg("SRTreeC", "An Agg package sent... %s , acked= %u \n", (err==SUCCESS)?"True":"False", call AggAcks.wasAcked(msg));
+		dbg("SRTreeC", "An Agg package sent... %s \n", (err==SUCCESS)?"True":"False");
 
-		// ΠΡΟΣΘΗΚΗ: Αν ο πατέρας δεν επιβεβαίωσε τη λήψη (π.χ. σύγκρουση με αδερφό που δεν μας ακούει), ξαναστέλνουμε
-		// το ίδιο μήνυμα μετά από μια μικρή τυχαία καθυστέρηση, το πολύ AGG_MAX_RETRIES φορές. Ο ασύρματος μένει 'busy'.
-		if ((err != SUCCESS || !(call AggAcks.wasAcked(msg))) && aggRetries < AGG_MAX_RETRIES)
-		{
-			aggRetries++;
-			call AggRetryTimer.startOneShot(1 + (call Random.rand16() % 10));
-			return;
-		}
-		if (err != SUCCESS || !(call AggAcks.wasAcked(msg)))
-		{
-			dbg("SRTreeC", "AggMsg to %u NOT acknowledged after %u retries \n", parentID, aggRetries);
-		}
-
+		// Όπως στο TAG, το μήνυμα στέλνεται μία φορά, χωρίς επιβεβαίωση λήψης (ACK) και χωρίς επαναποστολή.
 		AggSendBusy = FALSE;
 
 		if (!(call AggSendQueue.empty()))
@@ -613,28 +575,6 @@ implementation
 		}
 	}
 	
-	// ΠΡΟΣΘΗΚΗ: Επαναποστολή του μηνύματος συνάθροισης που δεν επιβεβαιώθηκε (είναι ακόμα στο radioAggSendPkt).
-	event void AggRetryTimer.fired()
-	{
-		uint8_t mlen = call AggPacket.payloadLength(&radioAggSendPkt);
-		uint16_t mdest = call AggAMPacket.destination(&radioAggSendPkt);
-
-		call AggAcks.requestAck(&radioAggSendPkt);
-		if (call AggAMSend.send(mdest, &radioAggSendPkt, mlen) == SUCCESS)
-		{
-			dbg("Messages", "epoch= %u node= %u to= %u bytes= %u retry= %u \n", roundCounter, TOS_NODE_ID, mdest, mlen, aggRetries);
-		}
-		else if (aggRetries < AGG_MAX_RETRIES)
-		{
-			aggRetries++;
-			call AggRetryTimer.startOneShot(1 + (call Random.rand16() % 10));
-		}
-		else
-		{
-			AggSendBusy = FALSE;
-		}
-	}
-
 	// ΠΡΟΣΘΗΚΗ: Event για το AggReceive.
 	// ΥΛΟΠΟΙΗΣΗ: Λήψη δεδομένων συνάθροισης από ένα παιδί. Τα μηνύματα είναι unicast, οπότε φτάνουν εδώ μόνο όσα
 	// έχουν προορισμό εμάς, δηλαδή μόνο από τα παιδιά μας. Όπως και στο routing, αντιγράφουμε το μήνυμα στην ουρά λήψης
@@ -902,10 +842,8 @@ implementation
 				{
 					// ΑΛΛΑΓΗ: Ήταν 'call RoutingMsgTimer.startOneShot(TIMER_FAST_PERIOD);'
 					// Προστέθηκε τυχαία καθυστέρηση [0, TIMER_FAST_PERIOD). Με σταθερή καθυστέρηση, οι κόμβοι που άκουσαν το
-					// ίδιο routing μήνυμα (π.χ. όλα τα παιδιά της ρίζας) το ξαναέστελναν ΤΑΥΤΟΧΡΟΝΑ, τα μηνύματα συγκρούονταν
-					// και κάποιοι γείτονες δεν άκουγαν κανένα: στην προσομοίωση (grid 5x5, εμβέλεια 1) ένας κόμβος δεν μπήκε
-					// ποτέ στο δέντρο και άλλοι πήραν μεγαλύτερο βάθος από το ελάχιστο.
-					routingRepeatsLeft = ROUTING_REPEATS; // ΠΡΟΣΘΗΚΗ
+					// ίδιο routing μήνυμα (π.χ. όλα τα παιδιά της ρίζας) το ξαναέστελναν ΤΑΥΤΟΧΡΟΝΑ, τα μηνύματα θα συγκρούονταν
+					// και κάποιοι γείτονες δεν θα άκουγαν κανένα.
 					call RoutingMsgTimer.startOneShot(TIMER_FAST_PERIOD + (call Random.rand16() % TIMER_FAST_PERIOD));
 				}
 			}
@@ -945,7 +883,6 @@ implementation
 					if (TOS_NODE_ID!=0)
 					{
 						// ΑΛΛΑΓΗ: Ίδια τυχαία καθυστέρηση με παραπάνω (ήταν 'startOneShot(TIMER_FAST_PERIOD)').
-						routingRepeatsLeft = ROUTING_REPEATS; // ΠΡΟΣΘΗΚΗ
 						call RoutingMsgTimer.startOneShot(TIMER_FAST_PERIOD + (call Random.rand16() % TIMER_FAST_PERIOD));
 					}
 				}
@@ -1004,8 +941,6 @@ implementation
 			return;
 		}
 
-		aggRetries = 0; // ΠΡΟΣΘΗΚΗ: καινούργιο μήνυμα
-		call AggAcks.requestAck(&radioAggSendPkt); // ΠΡΟΣΘΗΚΗ: ζητάμε ACK από τον πατέρα
 		if (call AggAMSend.send(mdest, &radioAggSendPkt, mlen) == SUCCESS)
 		{
 			AggSendBusy = TRUE;
@@ -1023,8 +958,6 @@ implementation
 	{
 		message_t radioAggRecPkt;
 		uint8_t len;
-		uint16_t src; // ΠΡΟΣΘΗΚΗ
-		uint8_t i; // ΠΡΟΣΘΗΚΗ
 		SumAggMsg* sumMsg;
 		AvgAggMsg* avgMsg;
 		VarAggMsg* varMsg;
@@ -1038,23 +971,6 @@ implementation
 		{
 			dbg("SRTreeC", "receiveAggTask(): Unknown message (len= %u)!!! \n", len);
 			return;
-		}
-
-		// ΠΡΟΣΘΗΚΗ: Αν έχουμε ήδη δεδομένα από αυτό το παιδί σε αυτή την εποχή, είναι επαναποστολή (χάθηκε το ACK):
-		// την αγνοούμε, αλλιώς θα το μετρούσαμε δύο φορές. Αλλιώς το σημειώνουμε ως 'ακούστηκε'.
-		src = call AggAMPacket.source(&radioAggRecPkt);
-		for (i = 0; i < heardCount; i++)
-		{
-			if (heardChildren[i] == src)
-			{
-				dbg("SRTreeC", "receiveAggTask(): duplicate from child %u ignored \n", src);
-				return;
-			}
-		}
-		if (heardCount < MAX_CHILDREN)
-		{
-			heardChildren[heardCount] = src;
-			heardCount++;
 		}
 
 		switch (queryType)
