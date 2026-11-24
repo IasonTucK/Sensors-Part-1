@@ -20,3 +20,22 @@ python mySimulation.py topology_5x5.txt > noack_log_5x5.txt
 for f in sum avg var max 5x5; do python check_results.py noack_log_$f.txt > noack_check_$f.txt; cat noack_check_$f.txt; done
 
 ls noack_log_*.txt noack_check_*.txt topology*.txt
+
+--------------------------------------------------------------------------------------------------------------------
+
+while [ ! -f join_log_sum.txt ] || [ ! -f join_log_avg.txt ] || [ ! -f join_log_var.txt ] || [ ! -f join_log_max.txt ]; do
+  python mySimulation.py > join_tmp.txt
+  case "$(grep -o 'queryType= [1-4]' join_tmp.txt | head -1)" in
+    "queryType= 1") [ -f join_log_sum.txt ] || cp join_tmp.txt join_log_sum.txt ;;
+    "queryType= 2") [ -f join_log_avg.txt ] || cp join_tmp.txt join_log_avg.txt ;;
+    "queryType= 3") [ -f join_log_var.txt ] || cp join_tmp.txt join_log_var.txt ;;
+    "queryType= 4") [ -f join_log_max.txt ] || cp join_tmp.txt join_log_max.txt ;;
+  esac
+done
+
+python mySimulation.py topology_5x5.txt > join_log_5x5.txt
+
+python mySimulation_jointest.py > join_log_test.txt
+
+for f in sum avg var max 5x5 test; do python check_results.py join_log_$f.txt > join_check_$f.txt; cat join_check_$f.txt; done
+grep -h "JoinRequest" join_log_*.txt
