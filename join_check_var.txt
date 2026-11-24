@@ -1,0 +1,11 @@
+Query: VARIANCE, epoch: 90 s
+Epoch  Nodes  Expected     Root         OK     AggMsgs   Bytes 
+1      6      1027.33      1027.33      yes    5         35    
+2      6      695.81       695.81       yes    5         35    
+3      6      489.89       489.89       yes    5         35    
+4      6      437.92       437.92       yes    5         35    
+5      6      469.14       0.00         NO     5         35    
+6      6      457.47       457.47       yes    5         35    
+7      6      694.22       366.89       NO     5         35    
+8      6      750.14       750.14       yes    5         35    
+Correct epochs: 6 / 8

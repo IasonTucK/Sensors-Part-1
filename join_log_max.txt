@@ -1,0 +1,543 @@
+TicksPerSecond :  10000000000 
+
+Topology: topology.txt  Nodes: 8  Links: 10 
+
+  0   1   -50.0
+  1   0   -50.0
+  1   4   -50.0
+  4   1   -50.0
+  1   7   -50.0
+  7   1   -50.0
+  1   2   -50.0
+  2   1   -50.0
+  4   5   -50.0
+  5   4   -50.0
+0:0:10.000000026 DEBUG (1): curdepth = 255  ,  parentID= 65535 
+0:0:10.000000027 DEBUG (0): curdepth = 0  ,  parentID= 0 
+0:0:10.000000027 DEBUG (3): curdepth = 255  ,  parentID= 65535 
+0:0:10.000000030 DEBUG (5): curdepth = 255  ,  parentID= 65535 
+0:0:10.000000034 DEBUG (4): curdepth = 255  ,  parentID= 65535 
+0:0:10.000000035 DEBUG (7): curdepth = 255  ,  parentID= 65535 
+0:0:10.000000036 DEBUG (1): Radio initialized successfully!!!
+0:0:10.000000037 DEBUG (0): Radio initialized successfully!!!
+0:0:10.000000037 DEBUG (0): ROOT: queryType= 4 (1=SUM, 2=AVG, 3=VARIANCE, 4=MAX) , epochSec= 70 
+0:0:10.000000037 DEBUG (0): NodeID= 0 : EpochTimer started, depth= 0 , first fire at 71680 ms, period 71680 ms 
+0:0:10.000000037 DEBUG (3): Radio initialized successfully!!!
+0:0:10.000000040 DEBUG (5): Radio initialized successfully!!!
+0:0:10.000000041 DEBUG (6): curdepth = 255  ,  parentID= 65535 
+0:0:10.000000044 DEBUG (4): Radio initialized successfully!!!
+0:0:10.000000045 DEBUG (7): Radio initialized successfully!!!
+0:0:10.000000051 DEBUG (6): Radio initialized successfully!!!
+0:0:10.000000085 DEBUG (2): curdepth = 255  ,  parentID= 65535 
+0:0:10.000000095 DEBUG (2): Radio initialized successfully!!!
+0:0:10.200195349 DEBUG (0): RoutingMsgTimer fired!  radioBusy = False 
+0:0:10.200195349 DEBUG (0): Sending RoutingMsg... 
+0:0:10.200195349 DEBUG (0): SendTask() posted!!
+0:0:10.200195349 DEBUG (0): RoutingMsg enqueued successfully in SendingQueue!!!
+0:0:10.200195359 DEBUG (0): sendRoutingTask(): Send returned success!!!
+0:0:10.204711934 DEBUG (1): ### RoutingReceive.receive() start ##### 
+0:0:10.204711934 DEBUG (1): Something received!!!  from 0 
+0:0:10.204711934 DEBUG (1): ### RoutingReceive.receive() end ##### 
+0:0:10.204711944 DEBUG (1): ReceiveRoutingTask(): len=3 
+0:0:10.204711944 DEBUG (1): receiveRoutingTask():senderID= 0 , depth= 0 
+0:0:10.204711944 DEBUG (1): NodeID= 1 : learned queryType= 4 , epochSec= 70 
+0:0:10.204711944 DEBUG (1): NodeID= 1 : EpochTimer started, depth= 1 , first fire at 71580 ms, period 71680 ms 
+0:0:10.204711944 DEBUG (1): NodeID= 1 : curdepth= 1 , parentID= 0 
+0:0:10.204879780 DEBUG (0): A Routing package sent... True 
+0:0:10.204879780 DEBUG (0): Package sent True 
+0:0:10.589843786 DEBUG (1): RoutingMsgTimer fired!  radioBusy = False 
+0:0:10.589843786 DEBUG (1): Sending RoutingMsg... 
+0:0:10.589843786 DEBUG (1): SendTask() posted!!
+0:0:10.589843786 DEBUG (1): RoutingMsg enqueued successfully in SendingQueue!!!
+0:0:10.589843796 DEBUG (1): sendRoutingTask(): Send returned success!!!
+0:0:10.595092789 DEBUG (2): ### RoutingReceive.receive() start ##### 
+0:0:10.595092789 DEBUG (2): Something received!!!  from 1 
+0:0:10.595092789 DEBUG (2): ### RoutingReceive.receive() end ##### 
+0:0:10.595092789 DEBUG (4): ### RoutingReceive.receive() start ##### 
+0:0:10.595092789 DEBUG (4): Something received!!!  from 1 
+0:0:10.595092789 DEBUG (4): ### RoutingReceive.receive() end ##### 
+0:0:10.595092789 DEBUG (0): ### RoutingReceive.receive() start ##### 
+0:0:10.595092789 DEBUG (0): Something received!!!  from 1 
+0:0:10.595092789 DEBUG (0): ### RoutingReceive.receive() end ##### 
+0:0:10.595092799 DEBUG (2): ReceiveRoutingTask(): len=3 
+0:0:10.595092799 DEBUG (2): receiveRoutingTask():senderID= 1 , depth= 1 
+0:0:10.595092799 DEBUG (2): NodeID= 2 : learned queryType= 4 , epochSec= 70 
+0:0:10.595092799 DEBUG (2): NodeID= 2 : EpochTimer started, depth= 2 , first fire at 71480 ms, period 71680 ms 
+0:0:10.595092799 DEBUG (2): NodeID= 2 : curdepth= 2 , parentID= 1 
+0:0:10.595092799 DEBUG (4): ReceiveRoutingTask(): len=3 
+0:0:10.595092799 DEBUG (4): receiveRoutingTask():senderID= 1 , depth= 1 
+0:0:10.595092799 DEBUG (4): NodeID= 4 : learned queryType= 4 , epochSec= 70 
+0:0:10.595092799 DEBUG (4): NodeID= 4 : EpochTimer started, depth= 2 , first fire at 71480 ms, period 71680 ms 
+0:0:10.595092799 DEBUG (4): NodeID= 4 : curdepth= 2 , parentID= 1 
+0:0:10.595092799 DEBUG (0): ReceiveRoutingTask(): len=3 
+0:0:10.595092799 DEBUG (0): receiveRoutingTask():senderID= 1 , depth= 1 
+0:0:10.595260635 DEBUG (1): A Routing package sent... True 
+0:0:10.595260635 DEBUG (1): Package sent True 
+0:0:10.881835981 DEBUG (4): RoutingMsgTimer fired!  radioBusy = False 
+0:0:10.881835981 DEBUG (4): Sending RoutingMsg... 
+0:0:10.881835981 DEBUG (4): SendTask() posted!!
+0:0:10.881835981 DEBUG (4): RoutingMsg enqueued successfully in SendingQueue!!!
+0:0:10.881835991 DEBUG (4): sendRoutingTask(): Send returned success!!!
+0:0:10.892944325 DEBUG (5): ### RoutingReceive.receive() start ##### 
+0:0:10.892944325 DEBUG (5): Something received!!!  from 4 
+0:0:10.892944325 DEBUG (5): ### RoutingReceive.receive() end ##### 
+0:0:10.892944325 DEBUG (1): ### RoutingReceive.receive() start ##### 
+0:0:10.892944325 DEBUG (1): Something received!!!  from 4 
+0:0:10.892944325 DEBUG (1): ### RoutingReceive.receive() end ##### 
+0:0:10.892944335 DEBUG (5): ReceiveRoutingTask(): len=3 
+0:0:10.892944335 DEBUG (5): receiveRoutingTask():senderID= 4 , depth= 2 
+0:0:10.892944335 DEBUG (5): NodeID= 5 : learned queryType= 4 , epochSec= 70 
+0:0:10.892944335 DEBUG (5): NodeID= 5 : EpochTimer started, depth= 3 , first fire at 71380 ms, period 71680 ms 
+0:0:10.892944335 DEBUG (5): NodeID= 5 : curdepth= 3 , parentID= 4 
+0:0:10.892944335 DEBUG (1): ReceiveRoutingTask(): len=3 
+0:0:10.892944335 DEBUG (1): receiveRoutingTask():senderID= 4 , depth= 2 
+0:0:10.893112170 DEBUG (4): A Routing package sent... True 
+0:0:10.893112170 DEBUG (4): Package sent True 
+0:0:10.934570407 DEBUG (2): RoutingMsgTimer fired!  radioBusy = False 
+0:0:10.934570407 DEBUG (2): Sending RoutingMsg... 
+0:0:10.934570407 DEBUG (2): SendTask() posted!!
+0:0:10.934570407 DEBUG (2): RoutingMsg enqueued successfully in SendingQueue!!!
+0:0:10.934570417 DEBUG (2): sendRoutingTask(): Send returned success!!!
+0:0:10.943115289 DEBUG (1): ### RoutingReceive.receive() start ##### 
+0:0:10.943115289 DEBUG (1): Something received!!!  from 2 
+0:0:10.943115289 DEBUG (1): ### RoutingReceive.receive() end ##### 
+0:0:10.943115299 DEBUG (1): ReceiveRoutingTask(): len=3 
+0:0:10.943115299 DEBUG (1): receiveRoutingTask():senderID= 2 , depth= 2 
+0:0:10.943283135 DEBUG (2): A Routing package sent... True 
+0:0:10.943283135 DEBUG (2): Package sent True 
+0:0:11.215820352 DEBUG (5): RoutingMsgTimer fired!  radioBusy = False 
+0:0:11.215820352 DEBUG (5): Sending RoutingMsg... 
+0:0:11.215820352 DEBUG (5): SendTask() posted!!
+0:0:11.215820352 DEBUG (5): RoutingMsg enqueued successfully in SendingQueue!!!
+0:0:11.215820362 DEBUG (5): sendRoutingTask(): Send returned success!!!
+0:0:11.224777219 DEBUG (4): ### RoutingReceive.receive() start ##### 
+0:0:11.224777219 DEBUG (4): Something received!!!  from 5 
+0:0:11.224777219 DEBUG (4): ### RoutingReceive.receive() end ##### 
+0:0:11.224777229 DEBUG (4): ReceiveRoutingTask(): len=3 
+0:0:11.224777229 DEBUG (4): receiveRoutingTask():senderID= 5 , depth= 3 
+0:0:11.224945065 DEBUG (5): A Routing package sent... True 
+0:0:11.224945065 DEBUG (5): Package sent True 
+0:0:13.000976614 DEBUG (6): NodeID= 6 : no parent, JoinRequest 1 sent 
+0:0:13.000976624 DEBUG (6): sendRoutingTask(): Send returned success!!!
+0:0:13.010162361 DEBUG (6): A Routing package sent... True 
+0:0:13.010162361 DEBUG (6): Package sent True 
+0:0:13.019531287 DEBUG (3): NodeID= 3 : no parent, JoinRequest 1 sent 
+0:0:13.019531297 DEBUG (3): sendRoutingTask(): Send returned success!!!
+0:0:13.028320308 DEBUG (3): A Routing package sent... True 
+0:0:13.028320308 DEBUG (3): Package sent True 
+0:0:13.040039108 DEBUG (7): NodeID= 7 : no parent, JoinRequest 1 sent 
+0:0:13.040039118 DEBUG (7): sendRoutingTask(): Send returned success!!!
+0:0:13.045547508 DEBUG (1): ### RoutingReceive.receive() start ##### 
+0:0:13.045547508 DEBUG (1): Something received!!!  from 7 
+0:0:13.045547508 DEBUG (1): ### RoutingReceive.receive() end ##### 
+0:0:13.045547518 DEBUG (1): ReceiveRoutingTask(): len=0 
+0:0:13.045547518 DEBUG (1): NodeID= 1 : JoinRequest from 7, sending RoutingMsg again 
+0:0:13.045715354 DEBUG (7): A Routing package sent... True 
+0:0:13.045715354 DEBUG (7): Package sent True 
+0:0:13.209960974 DEBUG (1): RoutingMsgTimer fired!  radioBusy = False 
+0:0:13.209960974 DEBUG (1): Sending RoutingMsg... 
+0:0:13.209960974 DEBUG (1): SendTask() posted!!
+0:0:13.209960974 DEBUG (1): RoutingMsg enqueued successfully in SendingQueue!!!
+0:0:13.209960984 DEBUG (1): sendRoutingTask(): Send returned success!!!
+0:0:13.215103166 DEBUG (7): ### RoutingReceive.receive() start ##### 
+0:0:13.215103166 DEBUG (7): Something received!!!  from 1 
+0:0:13.215103166 DEBUG (7): ### RoutingReceive.receive() end ##### 
+0:0:13.215103166 DEBUG (4): ### RoutingReceive.receive() start ##### 
+0:0:13.215103166 DEBUG (4): Something received!!!  from 1 
+0:0:13.215103166 DEBUG (4): ### RoutingReceive.receive() end ##### 
+0:0:13.215103166 DEBUG (0): ### RoutingReceive.receive() start ##### 
+0:0:13.215103166 DEBUG (0): Something received!!!  from 1 
+0:0:13.215103166 DEBUG (0): ### RoutingReceive.receive() end ##### 
+0:0:13.215103176 DEBUG (7): ReceiveRoutingTask(): len=3 
+0:0:13.215103176 DEBUG (7): receiveRoutingTask():senderID= 1 , depth= 1 
+0:0:13.215103176 DEBUG (7): NodeID= 7 : learned queryType= 4 , epochSec= 70 
+0:0:13.215103176 DEBUG (7): NodeID= 7 : EpochTimer started, depth= 2 , first fire at 71480 ms, period 71680 ms 
+0:0:13.215103176 DEBUG (7): NodeID= 7 : curdepth= 2 , parentID= 1 
+0:0:13.215103176 DEBUG (4): ReceiveRoutingTask(): len=3 
+0:0:13.215103176 DEBUG (4): receiveRoutingTask():senderID= 1 , depth= 1 
+0:0:13.215103176 DEBUG (0): ReceiveRoutingTask(): len=3 
+0:0:13.215103176 DEBUG (0): receiveRoutingTask():senderID= 1 , depth= 1 
+0:0:13.215271011 DEBUG (1): A Routing package sent... True 
+0:0:13.215271011 DEBUG (1): Package sent True 
+0:0:13.495117233 DEBUG (7): RoutingMsgTimer fired!  radioBusy = False 
+0:0:13.495117233 DEBUG (7): Sending RoutingMsg... 
+0:0:13.495117233 DEBUG (7): SendTask() posted!!
+0:0:13.495117233 DEBUG (7): RoutingMsg enqueued successfully in SendingQueue!!!
+0:0:13.495117243 DEBUG (7): sendRoutingTask(): Send returned success!!!
+0:0:13.503707891 DEBUG (1): ### RoutingReceive.receive() start ##### 
+0:0:13.503707891 DEBUG (1): Something received!!!  from 7 
+0:0:13.503707891 DEBUG (1): ### RoutingReceive.receive() end ##### 
+0:0:13.503707901 DEBUG (1): ReceiveRoutingTask(): len=3 
+0:0:13.503707901 DEBUG (1): receiveRoutingTask():senderID= 7 , depth= 2 
+0:0:13.503875736 DEBUG (7): A Routing package sent... True 
+0:0:13.503875736 DEBUG (7): Package sent True 
+0:0:16.082031287 DEBUG (3): NodeID= 3 : no parent, JoinRequest 2 sent 
+0:0:16.082031297 DEBUG (3): sendRoutingTask(): Send returned success!!!
+0:0:16.091171259 DEBUG (3): A Routing package sent... True 
+0:0:16.091171259 DEBUG (3): Package sent True 
+0:0:16.111328176 DEBUG (6): NodeID= 6 : no parent, JoinRequest 2 sent 
+0:0:16.111328186 DEBUG (6): sendRoutingTask(): Send returned success!!!
+0:0:16.122131346 DEBUG (6): A Routing package sent... True 
+0:0:16.122131346 DEBUG (6): Package sent True 
+0:0:19.119140676 DEBUG (6): NodeID= 6 : no parent, JoinRequest 3 sent 
+0:0:19.119140686 DEBUG (6): sendRoutingTask(): Send returned success!!!
+0:0:19.127273573 DEBUG (6): A Routing package sent... True 
+0:0:19.127273573 DEBUG (6): Package sent True 
+0:0:19.155273475 DEBUG (3): NodeID= 3 : no parent, JoinRequest 3 sent 
+0:0:19.155273485 DEBUG (3): sendRoutingTask(): Send returned success!!!
+0:0:19.162384039 DEBUG (3): A Routing package sent... True 
+0:0:19.162384039 DEBUG (3): Package sent True 
+0:1:19.707031290 DEBUG (5): NodeID= 5 : EpochTimer fired, epoch= 1 , depth= 3 
+0:1:19.707031290 DEBUG (5): epoch= 1 node= 5 depth= 3 parent= 4 measurement= 46 
+0:1:19.747070362 DEBUG (5): epoch= 1 node= 5 to= 4 bytes= 1 
+0:1:19.750885047 DEBUG (4): receiveAggTask(): data from child 5 merged 
+0:1:19.751052883 DEBUG (5): An Agg package sent... True 
+0:1:19.804687544 DEBUG (4): NodeID= 4 : EpochTimer fired, epoch= 1 , depth= 2 
+0:1:19.804687544 DEBUG (4): epoch= 1 node= 4 depth= 2 parent= 1 measurement= 37 
+0:1:19.804687545 DEBUG (7): NodeID= 7 : EpochTimer fired, epoch= 1 , depth= 2 
+0:1:19.804687545 DEBUG (7): epoch= 1 node= 7 depth= 2 parent= 1 measurement= 72 
+0:1:19.804687595 DEBUG (2): NodeID= 2 : EpochTimer fired, epoch= 1 , depth= 2 
+0:1:19.804687595 DEBUG (2): epoch= 1 node= 2 depth= 2 parent= 1 measurement= 42 
+0:1:19.822265679 DEBUG (4): epoch= 1 node= 4 to= 1 bytes= 1 
+0:1:19.831054743 DEBUG (7): epoch= 1 node= 7 to= 1 bytes= 1 
+0:1:19.832290655 DEBUG (1): receiveAggTask(): data from child 4 merged 
+0:1:19.832458490 DEBUG (4): An Agg package sent... True 
+0:1:19.836761506 DEBUG (1): receiveAggTask(): data from child 7 merged 
+0:1:19.836929342 DEBUG (7): An Agg package sent... True 
+0:1:19.846679792 DEBUG (2): epoch= 1 node= 2 to= 1 bytes= 1 
+0:1:19.849350075 DEBUG (1): receiveAggTask(): data from child 2 merged 
+0:1:19.849517910 DEBUG (2): An Agg package sent... True 
+0:1:19.902343786 DEBUG (1): NodeID= 1 : EpochTimer fired, epoch= 1 , depth= 1 
+0:1:19.902343786 DEBUG (1): epoch= 1 node= 1 depth= 1 parent= 0 measurement= 58 
+0:1:19.915039109 DEBUG (1): epoch= 1 node= 1 to= 0 bytes= 1 
+0:1:19.929046605 DEBUG (0): receiveAggTask(): data from child 1 merged 
+0:1:19.929214441 DEBUG (1): An Agg package sent... True 
+0:1:20.000000037 DEBUG (0): 
+ ##################################### 
+0:1:20.000000037 DEBUG (0): #######   EPOCH   1    ############## 
+0:1:20.000000037 DEBUG (0): #####################################
+0:1:20.000000037 DEBUG (0): NodeID= 0 : EpochTimer fired, epoch= 1 , depth= 0 
+0:1:20.000000037 DEBUG (0): epoch= 1 node= 0 depth= 0 parent= 0 measurement= 60 
+0:1:20.000000037 DEBUG (0): EPOCH 1 : MAX = 72 
+0:2:29.707031290 DEBUG (5): NodeID= 5 : EpochTimer fired, epoch= 2 , depth= 3 
+0:2:29.707031290 DEBUG (5): epoch= 2 node= 5 depth= 3 parent= 4 measurement= 51 
+0:2:29.730468800 DEBUG (5): epoch= 2 node= 5 to= 4 bytes= 1 
+0:2:29.733688396 DEBUG (4): receiveAggTask(): data from child 5 merged 
+0:2:29.733856231 DEBUG (5): An Agg package sent... True 
+0:2:29.804687544 DEBUG (4): NodeID= 4 : EpochTimer fired, epoch= 2 , depth= 2 
+0:2:29.804687544 DEBUG (4): epoch= 2 node= 4 depth= 2 parent= 1 measurement= 30 
+0:2:29.804687545 DEBUG (7): NodeID= 7 : EpochTimer fired, epoch= 2 , depth= 2 
+0:2:29.804687545 DEBUG (7): epoch= 2 node= 7 depth= 2 parent= 1 measurement= 88 
+0:2:29.804687595 DEBUG (2): NodeID= 2 : EpochTimer fired, epoch= 2 , depth= 2 
+0:2:29.804687595 DEBUG (2): epoch= 2 node= 2 depth= 2 parent= 1 measurement= 47 
+0:2:29.806640730 DEBUG (2): epoch= 2 node= 2 to= 1 bytes= 1 
+0:2:29.811828698 DEBUG (1): receiveAggTask(): data from child 2 merged 
+0:2:29.811996533 DEBUG (2): An Agg package sent... True 
+0:2:29.849609430 DEBUG (7): epoch= 2 node= 7 to= 1 bytes= 1 
+0:2:29.851562554 DEBUG (4): epoch= 2 node= 4 to= 1 bytes= 1 
+0:2:29.856750512 DEBUG (1): receiveAggTask(): data from child 7 merged 
+0:2:29.856918347 DEBUG (7): An Agg package sent... True 
+0:2:29.858581566 DEBUG (1): receiveAggTask(): data from child 4 merged 
+0:2:29.858749401 DEBUG (4): An Agg package sent... True 
+0:2:29.902343786 DEBUG (1): NodeID= 1 : EpochTimer fired, epoch= 2 , depth= 1 
+0:2:29.902343786 DEBUG (1): epoch= 2 node= 1 depth= 1 parent= 0 measurement= 46 
+0:2:29.906250046 DEBUG (1): epoch= 2 node= 1 to= 0 bytes= 1 
+0:2:29.909301796 DEBUG (0): receiveAggTask(): data from child 1 merged 
+0:2:29.909469632 DEBUG (1): An Agg package sent... True 
+0:2:30.000000037 DEBUG (0): 
+ ##################################### 
+0:2:30.000000037 DEBUG (0): #######   EPOCH   2    ############## 
+0:2:30.000000037 DEBUG (0): #####################################
+0:2:30.000000037 DEBUG (0): NodeID= 0 : EpochTimer fired, epoch= 2 , depth= 0 
+0:2:30.000000037 DEBUG (0): epoch= 2 node= 0 depth= 0 parent= 0 measurement= 62 
+0:2:30.000000037 DEBUG (0): EPOCH 2 : MAX = 88 
+0:3:39.707031290 DEBUG (5): NodeID= 5 : EpochTimer fired, epoch= 3 , depth= 3 
+0:3:39.707031290 DEBUG (5): epoch= 3 node= 5 depth= 3 parent= 4 measurement= 41 
+0:3:39.748046925 DEBUG (5): epoch= 3 node= 5 to= 4 bytes= 1 
+0:3:39.753387480 DEBUG (4): receiveAggTask(): data from child 5 merged 
+0:3:39.753555316 DEBUG (5): An Agg package sent... True 
+0:3:39.804687544 DEBUG (4): NodeID= 4 : EpochTimer fired, epoch= 3 , depth= 2 
+0:3:39.804687544 DEBUG (4): epoch= 3 node= 4 depth= 2 parent= 1 measurement= 35 
+0:3:39.804687545 DEBUG (7): NodeID= 7 : EpochTimer fired, epoch= 3 , depth= 2 
+0:3:39.804687545 DEBUG (7): epoch= 3 node= 7 depth= 2 parent= 1 measurement= 82 
+0:3:39.804687564 DEBUG (4): epoch= 3 node= 4 to= 1 bytes= 1 
+0:3:39.804687595 DEBUG (2): NodeID= 2 : EpochTimer fired, epoch= 3 , depth= 2 
+0:3:39.804687595 DEBUG (2): epoch= 3 node= 2 depth= 2 parent= 1 measurement= 52 
+0:3:39.813903828 DEBUG (1): receiveAggTask(): data from child 4 merged 
+0:3:39.814071664 DEBUG (4): An Agg package sent... True 
+0:3:39.819336042 DEBUG (2): epoch= 3 node= 2 to= 1 bytes= 1 
+0:3:39.822754001 DEBUG (1): receiveAggTask(): data from child 2 merged 
+0:3:39.822921837 DEBUG (2): An Agg package sent... True 
+0:3:39.848632868 DEBUG (7): epoch= 3 node= 7 to= 1 bytes= 1 
+0:3:39.854309114 DEBUG (1): receiveAggTask(): data from child 7 merged 
+0:3:39.854476950 DEBUG (7): An Agg package sent... True 
+0:3:39.902343786 DEBUG (1): NodeID= 1 : EpochTimer fired, epoch= 3 , depth= 1 
+0:3:39.902343786 DEBUG (1): epoch= 3 node= 1 depth= 1 parent= 0 measurement= 46 
+0:3:39.950195359 DEBUG (1): epoch= 3 node= 1 to= 0 bytes= 1 
+0:3:39.955719018 DEBUG (0): receiveAggTask(): data from child 1 merged 
+0:3:39.955886854 DEBUG (1): An Agg package sent... True 
+0:3:40.000000037 DEBUG (0): 
+ ##################################### 
+0:3:40.000000037 DEBUG (0): #######   EPOCH   3    ############## 
+0:3:40.000000037 DEBUG (0): #####################################
+0:3:40.000000037 DEBUG (0): NodeID= 0 : EpochTimer fired, epoch= 3 , depth= 0 
+0:3:40.000000037 DEBUG (0): epoch= 3 node= 0 depth= 0 parent= 0 measurement= 65 
+0:3:40.000000037 DEBUG (0): EPOCH 3 : MAX = 82 
+0:4:49.707031290 DEBUG (5): NodeID= 5 : EpochTimer fired, epoch= 4 , depth= 3 
+0:4:49.707031290 DEBUG (5): epoch= 4 node= 5 depth= 3 parent= 4 measurement= 43 
+0:4:49.714843800 DEBUG (5): epoch= 4 node= 5 to= 4 bytes= 1 
+0:4:49.717544600 DEBUG (4): receiveAggTask(): data from child 5 merged 
+0:4:49.717712435 DEBUG (5): An Agg package sent... True 
+0:4:49.804687544 DEBUG (4): NodeID= 4 : EpochTimer fired, epoch= 4 , depth= 2 
+0:4:49.804687544 DEBUG (4): epoch= 4 node= 4 depth= 2 parent= 1 measurement= 33 
+0:4:49.804687545 DEBUG (7): NodeID= 7 : EpochTimer fired, epoch= 4 , depth= 2 
+0:4:49.804687545 DEBUG (7): epoch= 4 node= 7 depth= 2 parent= 1 measurement= 86 
+0:4:49.804687595 DEBUG (2): NodeID= 2 : EpochTimer fired, epoch= 4 , depth= 2 
+0:4:49.804687595 DEBUG (2): epoch= 4 node= 2 depth= 2 parent= 1 measurement= 53 
+0:4:49.834960991 DEBUG (4): epoch= 4 node= 4 to= 1 bytes= 1 
+0:4:49.838928263 DEBUG (1): receiveAggTask(): data from child 4 merged 
+0:4:49.839096099 DEBUG (4): An Agg package sent... True 
+0:4:49.841796930 DEBUG (7): epoch= 4 node= 7 to= 1 bytes= 1 
+0:4:49.848007231 DEBUG (1): receiveAggTask(): data from child 7 merged 
+0:4:49.848175067 DEBUG (7): An Agg package sent... True 
+0:4:49.849609480 DEBUG (2): epoch= 4 node= 2 to= 1 bytes= 1 
+0:4:49.854553309 DEBUG (1): receiveAggTask(): data from child 2 merged 
+0:4:49.854721144 DEBUG (2): An Agg package sent... True 
+0:4:49.902343786 DEBUG (1): NodeID= 1 : EpochTimer fired, epoch= 4 , depth= 1 
+0:4:49.902343786 DEBUG (1): epoch= 4 node= 1 depth= 1 parent= 0 measurement= 41 
+0:4:49.911132859 DEBUG (1): epoch= 4 node= 1 to= 0 bytes= 1 
+0:4:49.921585078 DEBUG (0): receiveAggTask(): data from child 1 merged 
+0:4:49.921752914 DEBUG (1): An Agg package sent... True 
+0:4:50.000000037 DEBUG (0): 
+ ##################################### 
+0:4:50.000000037 DEBUG (0): #######   EPOCH   4    ############## 
+0:4:50.000000037 DEBUG (0): #####################################
+0:4:50.000000037 DEBUG (0): NodeID= 0 : EpochTimer fired, epoch= 4 , depth= 0 
+0:4:50.000000037 DEBUG (0): epoch= 4 node= 0 depth= 0 parent= 0 measurement= 76 
+0:4:50.000000037 DEBUG (0): EPOCH 4 : MAX = 86 
+0:5:59.707031290 DEBUG (5): NodeID= 5 : EpochTimer fired, epoch= 5 , depth= 3 
+0:5:59.707031290 DEBUG (5): epoch= 5 node= 5 depth= 3 parent= 4 measurement= 44 
+0:5:59.737304737 DEBUG (5): epoch= 5 node= 5 to= 4 bytes= 1 
+0:5:59.745712291 DEBUG (4): receiveAggTask(): data from child 5 merged 
+0:5:59.745880127 DEBUG (5): An Agg package sent... True 
+0:5:59.804687544 DEBUG (4): NodeID= 4 : EpochTimer fired, epoch= 5 , depth= 2 
+0:5:59.804687544 DEBUG (4): epoch= 5 node= 4 depth= 2 parent= 1 measurement= 34 
+0:5:59.804687545 DEBUG (7): NodeID= 7 : EpochTimer fired, epoch= 5 , depth= 2 
+0:5:59.804687545 DEBUG (7): epoch= 5 node= 7 depth= 2 parent= 1 measurement= 69 
+0:5:59.804687595 DEBUG (2): NodeID= 2 : EpochTimer fired, epoch= 5 , depth= 2 
+0:5:59.804687595 DEBUG (2): epoch= 5 node= 2 depth= 2 parent= 1 measurement= 52 
+0:5:59.836914118 DEBUG (7): epoch= 5 node= 7 to= 1 bytes= 1 
+0:5:59.840408370 DEBUG (1): receiveAggTask(): data from child 7 merged 
+0:5:59.840576206 DEBUG (7): An Agg package sent... True 
+0:5:59.840820366 DEBUG (4): epoch= 5 node= 4 to= 1 bytes= 1 
+0:5:59.845703230 DEBUG (2): epoch= 5 node= 2 to= 1 bytes= 1 
+0:5:59.849487397 DEBUG (1): receiveAggTask(): data from child 2 merged 
+0:5:59.849655233 DEBUG (2): An Agg package sent... True 
+0:5:59.851547242 DEBUG (1): receiveAggTask(): data from child 4 merged 
+0:5:59.851715078 DEBUG (4): An Agg package sent... True 
+0:5:59.902343786 DEBUG (1): NodeID= 1 : EpochTimer fired, epoch= 5 , depth= 1 
+0:5:59.902343786 DEBUG (1): epoch= 5 node= 1 depth= 1 parent= 0 measurement= 46 
+0:5:59.904296921 DEBUG (1): epoch= 5 node= 1 to= 0 bytes= 1 
+0:5:59.910568257 DEBUG (0): receiveAggTask(): data from child 1 merged 
+0:5:59.910736093 DEBUG (1): An Agg package sent... True 
+0:6:0.000000037 DEBUG (0): 
+ ##################################### 
+0:6:0.000000037 DEBUG (0): #######   EPOCH   5    ############## 
+0:6:0.000000037 DEBUG (0): #####################################
+0:6:0.000000037 DEBUG (0): NodeID= 0 : EpochTimer fired, epoch= 5 , depth= 0 
+0:6:0.000000037 DEBUG (0): epoch= 5 node= 0 depth= 0 parent= 0 measurement= 94 
+0:6:0.000000037 DEBUG (0): EPOCH 5 : MAX = 94 
+0:7:9.707031290 DEBUG (5): NodeID= 5 : EpochTimer fired, epoch= 6 , depth= 3 
+0:7:9.707031290 DEBUG (5): epoch= 6 node= 5 depth= 3 parent= 4 measurement= 45 
+0:7:9.730468800 DEBUG (5): epoch= 6 node= 5 to= 4 bytes= 1 
+0:7:9.741317746 DEBUG (4): receiveAggTask(): data from child 5 merged 
+0:7:9.741485581 DEBUG (5): An Agg package sent... True 
+0:7:9.804687544 DEBUG (4): NodeID= 4 : EpochTimer fired, epoch= 6 , depth= 2 
+0:7:9.804687544 DEBUG (4): epoch= 6 node= 4 depth= 2 parent= 1 measurement= 41 
+0:7:9.804687545 DEBUG (7): NodeID= 7 : EpochTimer fired, epoch= 6 , depth= 2 
+0:7:9.804687545 DEBUG (7): epoch= 6 node= 7 depth= 2 parent= 1 measurement= 74 
+0:7:9.804687595 DEBUG (2): NodeID= 2 : EpochTimer fired, epoch= 6 , depth= 2 
+0:7:9.804687595 DEBUG (2): epoch= 6 node= 2 depth= 2 parent= 1 measurement= 40 
+0:7:9.809570368 DEBUG (7): epoch= 6 node= 7 to= 1 bytes= 1 
+0:7:9.819427498 DEBUG (1): receiveAggTask(): data from child 7 merged 
+0:7:9.819595333 DEBUG (7): An Agg package sent... True 
+0:7:9.846679741 DEBUG (4): epoch= 6 node= 4 to= 1 bytes= 1 
+0:7:9.850586042 DEBUG (2): epoch= 6 node= 2 to= 1 bytes= 1 
+0:7:9.854721086 DEBUG (1): receiveAggTask(): data from child 4 merged 
+0:7:9.854888922 DEBUG (4): An Agg package sent... True 
+0:7:9.860977227 DEBUG (1): receiveAggTask(): data from child 2 merged 
+0:7:9.861145063 DEBUG (2): An Agg package sent... True 
+0:7:9.902343786 DEBUG (1): NodeID= 1 : EpochTimer fired, epoch= 6 , depth= 1 
+0:7:9.902343786 DEBUG (1): epoch= 6 node= 1 depth= 1 parent= 0 measurement= 41 
+0:7:9.907226609 DEBUG (1): epoch= 6 node= 1 to= 0 bytes= 1 
+0:7:9.910736120 DEBUG (0): receiveAggTask(): data from child 1 merged 
+0:7:9.910903956 DEBUG (1): An Agg package sent... True 
+0:7:10.000000037 DEBUG (0): 
+ ##################################### 
+0:7:10.000000037 DEBUG (0): #######   EPOCH   6    ############## 
+0:7:10.000000037 DEBUG (0): #####################################
+0:7:10.000000037 DEBUG (0): NodeID= 0 : EpochTimer fired, epoch= 6 , depth= 0 
+0:7:10.000000037 DEBUG (0): epoch= 6 node= 0 depth= 0 parent= 0 measurement= 90 
+0:7:10.000000037 DEBUG (0): EPOCH 6 : MAX = 90 
+0:8:19.707031290 DEBUG (5): NodeID= 5 : EpochTimer fired, epoch= 7 , depth= 3 
+0:8:19.707031290 DEBUG (5): epoch= 7 node= 5 depth= 3 parent= 4 measurement= 40 
+0:8:19.731445362 DEBUG (5): epoch= 7 node= 5 to= 4 bytes= 1 
+0:8:19.733993575 DEBUG (4): receiveAggTask(): data from child 5 merged 
+0:8:19.734161411 DEBUG (5): An Agg package sent... True 
+0:8:19.804687544 DEBUG (4): NodeID= 4 : EpochTimer fired, epoch= 7 , depth= 2 
+0:8:19.804687544 DEBUG (4): epoch= 7 node= 4 depth= 2 parent= 1 measurement= 50 
+0:8:19.804687545 DEBUG (7): NodeID= 7 : EpochTimer fired, epoch= 7 , depth= 2 
+0:8:19.804687545 DEBUG (7): epoch= 7 node= 7 depth= 2 parent= 1 measurement= 62 
+0:8:19.804687595 DEBUG (2): NodeID= 2 : EpochTimer fired, epoch= 7 , depth= 2 
+0:8:19.804687595 DEBUG (2): epoch= 7 node= 2 depth= 2 parent= 1 measurement= 40 
+0:8:19.833984480 DEBUG (2): epoch= 7 node= 2 to= 1 bytes= 1 
+0:8:19.837890680 DEBUG (7): epoch= 7 node= 7 to= 1 bytes= 1 
+0:8:19.839233483 DEBUG (1): receiveAggTask(): data from child 2 merged 
+0:8:19.839401318 DEBUG (2): An Agg package sent... True 
+0:8:19.841049241 DEBUG (1): receiveAggTask(): data from child 7 merged 
+0:8:19.841217077 DEBUG (7): An Agg package sent... True 
+0:8:19.848632866 DEBUG (4): epoch= 7 node= 4 to= 1 bytes= 1 
+0:8:19.851013233 DEBUG (1): receiveAggTask(): data from child 4 merged 
+0:8:19.851181069 DEBUG (4): An Agg package sent... True 
+0:8:19.902343786 DEBUG (1): NodeID= 1 : EpochTimer fired, epoch= 7 , depth= 1 
+0:8:19.902343786 DEBUG (1): epoch= 7 node= 1 depth= 1 parent= 0 measurement= 34 
+0:8:19.942382859 DEBUG (1): epoch= 7 node= 1 to= 0 bytes= 1 
+0:8:19.947937036 DEBUG (0): receiveAggTask(): data from child 1 merged 
+0:8:19.948104871 DEBUG (1): An Agg package sent... True 
+0:8:20.000000037 DEBUG (0): 
+ ##################################### 
+0:8:20.000000037 DEBUG (0): #######   EPOCH   7    ############## 
+0:8:20.000000037 DEBUG (0): #####################################
+0:8:20.000000037 DEBUG (0): NodeID= 0 : EpochTimer fired, epoch= 7 , depth= 0 
+0:8:20.000000037 DEBUG (0): epoch= 7 node= 0 depth= 0 parent= 0 measurement= 80 
+0:8:20.000000037 DEBUG (0): EPOCH 7 : MAX = 80 
+0:9:29.707031290 DEBUG (5): NodeID= 5 : EpochTimer fired, epoch= 8 , depth= 3 
+0:9:29.707031290 DEBUG (5): epoch= 8 node= 5 depth= 3 parent= 4 measurement= 34 
+0:9:29.714843800 DEBUG (5): epoch= 8 node= 5 to= 4 bytes= 1 
+0:9:29.722106951 DEBUG (4): receiveAggTask(): data from child 5 merged 
+0:9:29.722274787 DEBUG (5): An Agg package sent... True 
+0:9:29.804687544 DEBUG (4): NodeID= 4 : EpochTimer fired, epoch= 8 , depth= 2 
+0:9:29.804687544 DEBUG (4): epoch= 8 node= 4 depth= 2 parent= 1 measurement= 61 
+0:9:29.804687545 DEBUG (7): NodeID= 7 : EpochTimer fired, epoch= 8 , depth= 2 
+0:9:29.804687545 DEBUG (7): epoch= 8 node= 7 depth= 2 parent= 1 measurement= 50 
+0:9:29.804687564 DEBUG (4): epoch= 8 node= 4 to= 1 bytes= 1 
+0:9:29.804687595 DEBUG (2): NodeID= 2 : EpochTimer fired, epoch= 8 , depth= 2 
+0:9:29.804687595 DEBUG (2): epoch= 8 node= 2 depth= 2 parent= 1 measurement= 48 
+0:9:29.806640730 DEBUG (2): epoch= 8 node= 2 to= 1 bytes= 1 
+0:9:29.808395438 DEBUG (1): receiveAggTask(): data from child 4 merged 
+0:9:29.808563273 DEBUG (4): An Agg package sent... True 
+0:9:29.809661962 DEBUG (1): receiveAggTask(): data from child 2 merged 
+0:9:29.809829798 DEBUG (2): An Agg package sent... True 
+0:9:29.816406305 DEBUG (7): epoch= 8 node= 7 to= 1 bytes= 1 
+0:9:29.818084772 DEBUG (1): receiveAggTask(): data from child 7 merged 
+0:9:29.818252608 DEBUG (7): An Agg package sent... True 
+0:9:29.902343786 DEBUG (1): NodeID= 1 : EpochTimer fired, epoch= 8 , depth= 1 
+0:9:29.902343786 DEBUG (1): epoch= 8 node= 1 depth= 1 parent= 0 measurement= 37 
+0:9:29.942382859 DEBUG (1): epoch= 8 node= 1 to= 0 bytes= 1 
+0:9:29.948333762 DEBUG (0): receiveAggTask(): data from child 1 merged 
+0:9:29.948501598 DEBUG (1): An Agg package sent... True 
+0:9:30.000000037 DEBUG (0): 
+ ##################################### 
+0:9:30.000000037 DEBUG (0): #######   EPOCH   8    ############## 
+0:9:30.000000037 DEBUG (0): #####################################
+0:9:30.000000037 DEBUG (0): NodeID= 0 : EpochTimer fired, epoch= 8 , depth= 0 
+0:9:30.000000037 DEBUG (0): epoch= 8 node= 0 depth= 0 parent= 0 measurement= 81 
+0:9:30.000000037 DEBUG (0): EPOCH 8 : MAX = 81 
+0:10:39.707031290 DEBUG (5): NodeID= 5 : EpochTimer fired, epoch= 9 , depth= 3 
+0:10:39.707031290 DEBUG (5): epoch= 9 node= 5 depth= 3 parent= 4 measurement= 32 
+0:10:39.732421925 DEBUG (5): epoch= 9 node= 5 to= 4 bytes= 1 
+0:10:39.739593524 DEBUG (4): receiveAggTask(): data from child 5 merged 
+0:10:39.739761360 DEBUG (5): An Agg package sent... True 
+0:10:39.804687544 DEBUG (4): NodeID= 4 : EpochTimer fired, epoch= 9 , depth= 2 
+0:10:39.804687544 DEBUG (4): epoch= 9 node= 4 depth= 2 parent= 1 measurement= 65 
+0:10:39.804687545 DEBUG (7): NodeID= 7 : EpochTimer fired, epoch= 9 , depth= 2 
+0:10:39.804687545 DEBUG (7): epoch= 9 node= 7 depth= 2 parent= 1 measurement= 57 
+0:10:39.804687595 DEBUG (2): NodeID= 2 : EpochTimer fired, epoch= 9 , depth= 2 
+0:10:39.804687595 DEBUG (2): epoch= 9 node= 2 depth= 2 parent= 1 measurement= 43 
+0:10:39.808593804 DEBUG (4): epoch= 9 node= 4 to= 1 bytes= 1 
+0:10:39.818359382 DEBUG (1): receiveAggTask(): data from child 4 merged 
+0:10:39.818527217 DEBUG (4): An Agg package sent... True 
+0:10:39.835937555 DEBUG (7): epoch= 9 node= 7 to= 1 bytes= 1 
+0:10:39.842330950 DEBUG (7): An Agg package sent... True 
+0:10:39.842773542 DEBUG (2): epoch= 9 node= 2 to= 1 bytes= 1 
+0:10:39.847274859 DEBUG (2): An Agg package sent... True 
+0:10:39.902343786 DEBUG (1): NodeID= 1 : EpochTimer fired, epoch= 9 , depth= 1 
+0:10:39.902343786 DEBUG (1): epoch= 9 node= 1 depth= 1 parent= 0 measurement= 40 
+0:10:39.922851609 DEBUG (1): epoch= 9 node= 1 to= 0 bytes= 1 
+0:10:39.928360010 DEBUG (0): receiveAggTask(): data from child 1 merged 
+0:10:39.928527845 DEBUG (1): An Agg package sent... True 
+0:10:40.000000037 DEBUG (0): 
+ ##################################### 
+0:10:40.000000037 DEBUG (0): #######   EPOCH   9    ############## 
+0:10:40.000000037 DEBUG (0): #####################################
+0:10:40.000000037 DEBUG (0): NodeID= 0 : EpochTimer fired, epoch= 9 , depth= 0 
+0:10:40.000000037 DEBUG (0): epoch= 9 node= 0 depth= 0 parent= 0 measurement= 85 
+0:10:40.000000037 DEBUG (0): EPOCH 9 : MAX = 85 
+0:11:49.707031290 DEBUG (5): NodeID= 5 : EpochTimer fired, epoch= 10 , depth= 3 
+0:11:49.707031290 DEBUG (5): epoch= 10 node= 5 depth= 3 parent= 4 measurement= 29 
+0:11:49.728515675 DEBUG (5): epoch= 10 node= 5 to= 4 bytes= 1 
+0:11:49.732284584 DEBUG (4): receiveAggTask(): data from child 5 merged 
+0:11:49.732452419 DEBUG (5): An Agg package sent... True 
+0:11:49.804687544 DEBUG (4): NodeID= 4 : EpochTimer fired, epoch= 10 , depth= 2 
+0:11:49.804687544 DEBUG (4): epoch= 10 node= 4 depth= 2 parent= 1 measurement= 58 
+0:11:49.804687545 DEBUG (7): NodeID= 7 : EpochTimer fired, epoch= 10 , depth= 2 
+0:11:49.804687545 DEBUG (7): epoch= 10 node= 7 depth= 2 parent= 1 measurement= 70 
+0:11:49.804687595 DEBUG (2): NodeID= 2 : EpochTimer fired, epoch= 10 , depth= 2 
+0:11:49.804687595 DEBUG (2): epoch= 10 node= 2 depth= 2 parent= 1 measurement= 41 
+0:11:49.816406355 DEBUG (2): epoch= 10 node= 2 to= 1 bytes= 1 
+0:11:49.819641209 DEBUG (1): receiveAggTask(): data from child 2 merged 
+0:11:49.819809045 DEBUG (2): An Agg package sent... True 
+0:11:49.835937554 DEBUG (4): epoch= 10 node= 4 to= 1 bytes= 1 
+0:11:49.839569124 DEBUG (4): An Agg package sent... True 
+0:11:49.844726618 DEBUG (7): epoch= 10 node= 7 to= 1 bytes= 1 
+0:11:49.851623560 DEBUG (1): receiveAggTask(): data from child 7 merged 
+0:11:49.851791396 DEBUG (7): An Agg package sent... True 
+0:11:49.902343786 DEBUG (1): NodeID= 1 : EpochTimer fired, epoch= 10 , depth= 1 
+0:11:49.902343786 DEBUG (1): epoch= 10 node= 1 depth= 1 parent= 0 measurement= 40 
+0:11:49.913085984 DEBUG (1): epoch= 10 node= 1 to= 0 bytes= 1 
+0:11:49.917312654 DEBUG (0): receiveAggTask(): data from child 1 merged 
+0:11:49.917480489 DEBUG (1): An Agg package sent... True 
+0:11:50.000000037 DEBUG (0): 
+ ##################################### 
+0:11:50.000000037 DEBUG (0): #######   EPOCH   10    ############## 
+0:11:50.000000037 DEBUG (0): #####################################
+0:11:50.000000037 DEBUG (0): NodeID= 0 : EpochTimer fired, epoch= 10 , depth= 0 
+0:11:50.000000037 DEBUG (0): epoch= 10 node= 0 depth= 0 parent= 0 measurement= 75 
+0:11:50.000000037 DEBUG (0): EPOCH 10 : MAX = 75 
+0:12:59.707031290 DEBUG (5): NodeID= 5 : EpochTimer fired, epoch= 11 , depth= 3 
+0:12:59.707031290 DEBUG (5): epoch= 11 node= 5 depth= 3 parent= 4 measurement= 23 
+0:12:59.753906300 DEBUG (5): epoch= 11 node= 5 to= 4 bytes= 1 
+0:12:59.756027269 DEBUG (4): receiveAggTask(): data from child 5 merged 
+0:12:59.756195105 DEBUG (5): An Agg package sent... True 
+0:12:59.804687544 DEBUG (4): NodeID= 4 : EpochTimer fired, epoch= 11 , depth= 2 
+0:12:59.804687544 DEBUG (4): epoch= 11 node= 4 depth= 2 parent= 1 measurement= 55 
+0:12:59.804687545 DEBUG (7): NodeID= 7 : EpochTimer fired, epoch= 11 , depth= 2 
+0:12:59.804687545 DEBUG (7): epoch= 11 node= 7 depth= 2 parent= 1 measurement= 60 
+0:12:59.804687595 DEBUG (2): NodeID= 2 : EpochTimer fired, epoch= 11 , depth= 2 
+0:12:59.804687595 DEBUG (2): epoch= 11 node= 2 depth= 2 parent= 1 measurement= 36 
+0:12:59.813476618 DEBUG (7): epoch= 11 node= 7 to= 1 bytes= 1 
+0:12:59.817031905 DEBUG (1): receiveAggTask(): data from child 7 merged 
+0:12:59.817199740 DEBUG (7): An Agg package sent... True 
+0:12:59.845703230 DEBUG (2): epoch= 11 node= 2 to= 1 bytes= 1 
+0:12:59.848434547 DEBUG (1): receiveAggTask(): data from child 2 merged 
+0:12:59.848602383 DEBUG (2): An Agg package sent... True 
+0:12:59.849609429 DEBUG (4): epoch= 11 node= 4 to= 1 bytes= 1 
+0:12:59.859222420 DEBUG (1): receiveAggTask(): data from child 4 merged 
+0:12:59.859390255 DEBUG (4): An Agg package sent... True 
+0:12:59.902343786 DEBUG (1): NodeID= 1 : EpochTimer fired, epoch= 11 , depth= 1 
+0:12:59.902343786 DEBUG (1): epoch= 11 node= 1 depth= 1 parent= 0 measurement= 47 
+0:12:59.928710984 DEBUG (1): epoch= 11 node= 1 to= 0 bytes= 1 
+0:12:59.934326195 DEBUG (0): receiveAggTask(): data from child 1 merged 
+0:12:59.934494031 DEBUG (1): An Agg package sent... True 
+0:13:0.000000037 DEBUG (0): 
+ ##################################### 
+0:13:0.000000037 DEBUG (0): #######   EPOCH   11    ############## 
+0:13:0.000000037 DEBUG (0): #####################################
+0:13:0.000000037 DEBUG (0): NodeID= 0 : EpochTimer fired, epoch= 11 , depth= 0 
+0:13:0.000000037 DEBUG (0): epoch= 11 node= 0 depth= 0 parent= 0 measurement= 58 
+0:13:0.000000037 DEBUG (0): EPOCH 11 : MAX = 60 
+Node 0 connected with node 1 True True
+Node 0 connected with node 2 False False
+Node 1 connected with node 7 True True
+Node 2 connected with node 3 False False
+Node 4 connected with node 8 False False
