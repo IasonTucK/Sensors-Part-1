@@ -34,6 +34,8 @@ implementation{
 	components new TimerMilliC() as EpochTimerC;
 	// ΠΡΟΣΘΗΚΗ: Ο μετρητής της τυχαίας καθυστέρησης αποστολής προς τον πατέρα.
 	components new TimerMilliC() as AggSendTimerC;
+	// ΠΡΟΣΘΗΚΗ: Ο μετρητής της αίτησης ένταξης στο δέντρο (JoinRequest).
+	components new TimerMilliC() as JoinTimerC;
 	// ΑΦΑΙΡΕΣΗ: 'components new TimerMilliC() as LostTaskTimerC;' (ο LostTaskTimer δεν ξεκινούσε ποτέ, νεκρός κώδικας).
 
 	// Εδώ δηλώνουμε τα 'interfaces' που θα χρησιμοποιήσουμε. Όλα αυτά τα 'interfaces' είναι δηλωμένα στο άλλο αρχείο και εδώ κάνουμε το wiring.
@@ -49,6 +51,7 @@ implementation{
 	SRTreeC.RoutingMsgTimer->RoutingMsgTimerC;
 	SRTreeC.EpochTimer->EpochTimerC; // ΠΡΟΣΘΗΚΗ
 	SRTreeC.AggSendTimer->AggSendTimerC; // ΠΡΟΣΘΗΚΗ
+	SRTreeC.JoinTimer->JoinTimerC; // ΠΡΟΣΘΗΚΗ
 	// ΑΦΑΙΡΕΣΗ: 'SRTreeC.LostTaskTimer->LostTaskTimerC;'
 
 	SRTreeC.RoutingPacket->RoutingSenderC.Packet;
