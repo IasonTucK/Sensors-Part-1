@@ -40,6 +40,8 @@ module SRTreeC
 	uses interface Timer<TMilli> as EpochTimer;
 	// ΠΡΟΣΘΗΚΗ: Μετρητής μιας χρήσης για την τυχαία καθυστέρηση της αποστολής προς τον πατέρα, μέσα στο slot του κόμβου.
 	uses interface Timer<TMilli> as AggSendTimer;
+	// ΠΡΟΣΘΗΚΗ: Μετρητής της αίτησης ένταξης στο δέντρο (JoinRequest), για κόμβους που έχασαν το routing μήνυμα.
+	uses interface Timer<TMilli> as JoinTimer;
 	// ΑΦΑΙΡΕΣΗ: 'uses interface Timer<TMilli> as LostTaskTimer;'
 	// Η μόνη εντολή που τον ξεκινούσε ήταν σε σχόλιο, άρα δεν χτυπούσε ποτέ (νεκρός κώδικας).
 	
@@ -106,6 +108,8 @@ implementation
 	// TRUE από τη στιγμή που χτυπάει ο EpochTimer μέχρι να φύγει το μήνυμα προς τον πατέρα (στη διάρκεια της τυχαίας
 	// καθυστέρησης). Τότε δεχόμαστε ακόμα δεδομένα από τα παιδιά για την τρέχουσα εποχή.
 	bool aggPending=FALSE;
+	// ΠΡΟΣΘΗΚΗ: Πόσες αιτήσεις ένταξης (JoinRequest) έχει στείλει ο κόμβος.
+	uint8_t joinTries=0;
 
 	
 	// Αυτά είναι 'tasks' που ορίζω παρακάτω
@@ -292,6 +296,12 @@ implementation
 
 				call RoutingMsgTimer.startOneShot(TIMER_FAST_PERIOD);
 			}
+			else
+			{
+				// ΠΡΟΣΘΗΚΗ: Κάθε άλλος κόμβος ελέγχει μετά από JOIN_WAIT_MILLI (+ τυχαία καθυστέρηση, για να μη στέλνουν
+				// όλοι μαζί) αν μπήκε στο δέντρο. Αν όχι, στέλνει αίτηση ένταξης (βλ. JoinTimer.fired()).
+				call JoinTimer.startOneShot(JOIN_WAIT_MILLI + (call Random.rand16() % TIMER_FAST_PERIOD));
+			}
 		}
 		else
 		{
@@ -318,6 +328,41 @@ implementation
 	// δεν ξεκινούσε ποτέ. Δεν χρειάζεται αντικατάσταση: αν η sendRoutingTask() βρει τον ασύρματο busy, το
 	// RoutingAMSend.sendDone() την ξανακάνει post μόλις τελειώσει η τρέχουσα αποστολή (αφού η ουρά δεν είναι άδεια).
 	
+	// ΠΡΟΣΘΗΚΗ: Αίτηση ένταξης στο δέντρο (JoinRequest).
+	// Το δέντρο χτίζεται μία φορά και κάθε κόμβος στέλνει το routing μήνυμά του μία φορά. Αν ένας κόμβος δεν ακούσει κανένα
+	// routing μήνυμα (θόρυβος ή σύγκρουση), δεν μπαίνει ποτέ στο δέντρο και λείπει από όλες τις εποχές. Γι' αυτό, αν μετά
+	// από JOIN_WAIT_MILLI δεν έχει πατέρα, στέλνει broadcast ένα routing μήνυμα ΧΩΡΙΣ δεδομένα (0 bytes). Όποιος γείτονας
+	// είναι ήδη στο δέντρο το λαμβάνει και ξαναστέλνει το routing μήνυμά του (βλ. receiveRoutingTask()), οπότε ο κόμβος
+	// μπαίνει στο δέντρο με τον κανονικό τρόπο. Επιπλέον μηνύματα στέλνονται μόνο όταν κάποιος κόμβος έχασε το routing.
+	event void JoinTimer.fired()
+	{
+		message_t tmp;
+
+		if ((parentID < 65535) || (joinTries >= JOIN_MAX_TRIES))
+		{
+			return; // Μπήκε ήδη στο δέντρο ή έστειλε όσες αιτήσεις επιτρέπονται
+		}
+		if (call RoutingSendQueue.full())
+		{
+			return;
+		}
+
+		call RoutingAMPacket.setDestination(&tmp, AM_BROADCAST_ADDR);
+		call RoutingPacket.setPayloadLength(&tmp, 0); // Κενό μήνυμα: το μέγεθος 0 το ξεχωρίζει από το RoutingMsg
+		if (call RoutingSendQueue.enqueue(tmp) == SUCCESS)
+		{
+			joinTries++;
+			dbg("SRTreeC", "NodeID= %d : no parent, JoinRequest %u sent \n", TOS_NODE_ID, joinTries);
+			if (call RoutingSendQueue.size() == 1)
+			{
+				post sendRoutingTask();
+			}
+		}
+
+		// Αν δεν απαντήσει κανείς, ξαναδοκιμάζουμε (το πολύ JOIN_MAX_TRIES φορές συνολικά).
+		call JoinTimer.startOneShot(JOIN_WAIT_MILLI + (call Random.rand16() % TIMER_FAST_PERIOD));
+	}
+
 	event void RoutingMsgTimer.fired()
 	{
 		message_t tmp;
@@ -717,7 +762,8 @@ implementation
 		//call Led2Timer.startOneShot(TIMER_LEDS_MILLI);
 		mlen= call RoutingPacket.payloadLength(&radioRoutingSendPkt); // Παίρνουμε το μέγεθος του μηνύματος
 		mdest=call RoutingAMPacket.destination(&radioRoutingSendPkt); // Παίρνουμε τον αποδέκτη του μηνύματος
-		if(mlen!=sizeof(RoutingMsg))
+		// ΑΛΛΑΓΗ: Ήταν 'if(mlen!=sizeof(RoutingMsg))'. Δεχόμαστε και μέγεθος 0 (αίτηση ένταξης, βλ. JoinTimer.fired()).
+		if((mlen!=sizeof(RoutingMsg)) && (mlen!=0))
 		{
 			dbg("SRTreeC","\t\tsendRoutingTask(): Unknown message!!!\n");
 #ifdef PRINTFDBG_MODE
@@ -779,6 +825,19 @@ implementation
 		// processing of radioRecPkt
 		
 		// pos tha xexorizo ta 2 diaforetika minimata???
+
+		// ΠΡΟΣΘΗΚΗ: Μέγεθος 0 = αίτηση ένταξης από γείτονα που δεν έχει πατέρα. Αν εμείς είμαστε στο δέντρο (ρίζα ή κόμβος με
+		// πατέρα), ξαναστέλνουμε το routing μήνυμά μας μετά από τυχαία καθυστέρηση (για να μην απαντήσουν όλοι οι γείτονες μαζί).
+		// Αν το routing μήνυμά μας είναι ήδη προγραμματισμένο, δεν χρειάζεται να κάνουμε κάτι.
+		if (len == 0)
+		{
+			if ((curdepth != 255) && !(call RoutingMsgTimer.isRunning()))
+			{
+				dbg("SRTreeC", "NodeID= %d : JoinRequest from %u, sending RoutingMsg again \n", TOS_NODE_ID, call RoutingAMPacket.source(&radioRoutingRecPkt));
+				call RoutingMsgTimer.startOneShot(1 + (call Random.rand16() % TIMER_FAST_PERIOD));
+			}
+			return;
+		}
 				
 		if(len == sizeof(RoutingMsg)) // Σίγουρα θα έχει αυτό το μέγεθος
 		{
