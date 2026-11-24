@@ -1,0 +1,22 @@
+make micaz sim
+
+while [ ! -f noack_log_sum.txt ] || [ ! -f noack_log_avg.txt ] || [ ! -f noack_log_var.txt ] || [ ! -f noack_log_max.txt ]; do
+  python mySimulation.py > noack_tmp.txt
+  case "$(grep -o 'queryType= [1-4]' noack_tmp.txt | head -1)" in
+    "queryType= 1") [ -f noack_log_sum.txt ] || cp noack_tmp.txt noack_log_sum.txt ;;
+    "queryType= 2") [ -f noack_log_avg.txt ] || cp noack_tmp.txt noack_log_avg.txt ;;
+    "queryType= 3") [ -f noack_log_var.txt ] || cp noack_tmp.txt noack_log_var.txt ;;
+    "queryType= 4") [ -f noack_log_max.txt ] || cp noack_tmp.txt noack_log_max.txt ;;
+  esac
+done
+
+mkdir -p grid
+cd grid
+python ../topology_generator.py 5 1.5
+cd ..
+cp grid/topology.txt topology_5x5.txt
+python mySimulation.py topology_5x5.txt > noack_log_5x5.txt
+
+for f in sum avg var max 5x5; do python check_results.py noack_log_$f.txt > noack_check_$f.txt; cat noack_check_$f.txt; done
+
+ls noack_log_*.txt noack_check_*.txt topology*.txt
